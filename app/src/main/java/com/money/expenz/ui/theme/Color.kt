@@ -1,0 +1,26 @@
+package com.money.expenz.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+val Purple80 = Color(0xFFD0BCFF)
+val PurpleGrey80 = Color(0xFFCCC2DC)
+val Pink80 = Color(0xFFEFB8C8)
+val Teal80= Color(0xFF03DAC5)
+val MayaBlue = Color(0xFF58BDFF)
+val RedOrange = Color(0xFFC4421A)
+val Red200 = Color(0xfff297a2)
+val Red300 = Color(0xffea6d7e)
+val Orange = Color(0xFFF98F45)
+val Cyan = Color(0xFF97CECC)
+val Cyan80 = Color(0xFF12908E)
+val DarkSeaGreen = Color(0xFF8FBC8B)
+val GreenCyan = Color(0xFF16594A)
+val Olive = Color(0xFF808000)
+val Teal40= Color(0xFF018786)
+val SeaBlue = Color(0xFF125B7F)
+val SquidInk = Color(0xFF092D40)
+val Purple40 = Color(0xFF6650a4)
+val PurpleGrey40 = Color(0xFF625b71)
+val Pink40 = Color(0xFF7D5260)
+val Black = Color(0xFF000000)
+val White = Color(0xFFFFFFFF)

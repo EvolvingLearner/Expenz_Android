@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Expenz</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Expenz</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="details">Details</string>
+    <string name="menu_add">Add</string>
+    <string name="menu_subscriptions">Subscriptions</string>
+
+    // Subscriptions
+    <string name="subscriptions">My Subscriptions</string>
+    <string name="netflix">Netflix</string>
+    <string name="door_dash">Door Dash</string>
+    <string name="amazon">Amazon Prime</string>
+    <string name="hulu">Hulu</string>
+    <string name="vpn">Private Internet Access</string>
+    <string name="wifi">xInfinity</string>
+    <string name="electricity">JCREMC</string>
+    <string name="mobile">GoogleFi</string>
+
+    // Income
+    <string name="total_income">Total Income</string>
+    // Expense
+    <string name="total_Expense">Total Expense</string>
+    <string name="total_amount">$10000</string>
+    <string name="amount">Amount</string>
+    <string name="enter_amount">Enter Amount</string>
+    <string name="notes">Notes</string>
+    <string name="any_notes">Any notes?</string>
+    <string name="category">Category</string>
+    <string name="add">ADD</string>
+    <string name="large_text">
+        "Material is the metaphor.\n\n"
+    </string>
+
+</resources>
