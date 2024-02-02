@@ -1,7 +1,7 @@
 package com.money.expenz.data
 
 import com.money.expenz.R
-import com.money.expenz.model.Subscription
+import com.money.expenz.data.Subscription
 
 class DataSource {
 

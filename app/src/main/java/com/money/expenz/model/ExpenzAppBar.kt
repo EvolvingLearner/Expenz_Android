@@ -1,4 +1,4 @@
-package com.money.expenz.data
+package com.money.expenz.model
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -28,8 +27,9 @@ import androidx.navigation.compose.rememberNavController
 import com.money.expenz.ui.BottomNavItem
 import com.money.expenz.ui.NavigationSetup
 import com.money.expenz.ui.Screen
+import com.money.expenz.ui.home.ExpenzViewModel
 
-class ExpenzAppBar() {
+class ExpenzAppBar {
 
     object ExpenzTheme {
         val colorScheme: ColorScheme
@@ -44,13 +44,12 @@ class ExpenzAppBar() {
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @Composable
-    fun AppBar(navController: NavHostController = rememberNavController()) {
+    fun AppBar(viewModel: ExpenzViewModel, navController: NavHostController = rememberNavController() ) {
         // Get current back stack entry
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route
         // Get the name of the current screen
-        val currentScreen = Screen.valueOf(currentRoute)
-
+        val currentScreen = Screen.valueOf(currentRoute ?: Screen.Home.route)
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -62,10 +61,10 @@ class ExpenzAppBar() {
             bottomBar = {
                 BottomNavigationBar(navController = navController)
             },
-            backgroundColor = ExpenzTheme.colorScheme.surface,
-            contentColor = ExpenzTheme.colorScheme.onSurface
+            backgroundColor = ExpenzTheme.colorScheme.background,
+            contentColor = ExpenzTheme.colorScheme.onBackground
         ) { innerPadding ->
-            BaseContent(innerPadding, navController)
+            BaseContent(viewModel,innerPadding, navController)
         }
     }
 
@@ -79,8 +78,8 @@ class ExpenzAppBar() {
         val localContext = LocalContext.current as Activity
         TopAppBar(
             title = { Text(stringResource(currentScreen.title)) },
-            backgroundColor = Color.LightGray,
-            contentColor = ExpenzTheme.colorScheme.scrim,
+            backgroundColor = ExpenzTheme.colorScheme.primary,
+            contentColor = ExpenzTheme.colorScheme.onPrimary,
             actions = {
                 AppBarActionButton(
                     imageVector = Icons.Outlined.ExitToApp,
@@ -92,12 +91,11 @@ class ExpenzAppBar() {
             modifier = modifier,
             navigationIcon = {
                 if (canNavigateBack) {
-                    IconButton(onClick = navigateUp ) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
+                    AppBarActionButton(
+                        imageVector = Icons.Filled.ArrowBack,
+                        description = "Back",
+                        onClick = navigateUp
+                    )
                 }
             }
         )
@@ -115,7 +113,7 @@ class ExpenzAppBar() {
             Icon(
                 imageVector = imageVector,
                 contentDescription = description,
-                tint = ExpenzTheme.colorScheme.scrim
+                tint = ExpenzTheme.colorScheme.onPrimary
             )
         }
     }
@@ -132,8 +130,8 @@ class ExpenzAppBar() {
 
         BottomNavigation(
             modifier = Modifier.fillMaxWidth(),
-            backgroundColor = Color.LightGray,
-            contentColor = ExpenzTheme.colorScheme.scrim,
+            backgroundColor = ExpenzTheme.colorScheme.primary,
+            contentColor = ExpenzTheme.colorScheme.onPrimary,
         ) {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
@@ -142,7 +140,8 @@ class ExpenzAppBar() {
                     icon = {
                         Icon(
                             imageVector = item.icon,
-                            contentDescription = stringResource(id = item.titleResId)
+                            contentDescription = stringResource(id = item.titleResId),
+                            tint = ExpenzTheme.colorScheme.onPrimary
                         )
                     },
                     label = { Text(text = stringResource(id = item.titleResId)) },
@@ -169,7 +168,7 @@ class ExpenzAppBar() {
     }
 
     @Composable
-    fun BaseContent(innerPaddingValues: PaddingValues, navController: NavHostController) {
+    fun BaseContent(viewModel: ExpenzViewModel,innerPaddingValues: PaddingValues, navController: NavHostController) {
         Column(
             Modifier.padding(
                 paddingValues = PaddingValues(
@@ -182,7 +181,8 @@ class ExpenzAppBar() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            NavigationSetup(navController = navController)
+            NavigationSetup(viewModel,navController = navController,Screen.Home.route)
+            //HomeScreen(viewModel, navController)
         }
     }
 }
