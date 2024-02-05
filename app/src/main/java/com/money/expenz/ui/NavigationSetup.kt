@@ -1,7 +1,6 @@
 package com.money.expenz.ui
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,7 +14,7 @@ fun NavigationSetup(viewModel: ExpenzViewModel, navController: NavHostController
             LoginScreen(viewModel, navController)
         }
         composable(Screen.Register.route) {
-            RegisterScreen(viewModel, navController)
+            RegisterScreen(viewModel)
         }
         composable(BottomNavItem.Home.route) {
             HomeScreen(viewModel, navController)

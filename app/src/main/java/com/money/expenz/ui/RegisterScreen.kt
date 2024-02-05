@@ -15,20 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.money.expenz.data.User
 import com.money.expenz.model.ExpenzAppBar
 import com.money.expenz.ui.home.ExpenzViewModel
 
 @Composable
-fun RegisterScreen(viewModel: ExpenzViewModel, navController: NavController) {
+fun RegisterScreen(viewModel: ExpenzViewModel) {
     val username = remember { mutableStateOf("") }
     val email = remember { mutableStateOf("") }
     val country = remember { mutableStateOf("") }
@@ -54,6 +51,7 @@ fun RegisterScreen(viewModel: ExpenzViewModel, navController: NavController) {
                         country = country.value
                     )
                     viewModel.registerUser(newUser)
+                    viewModel.checkUserInDB(username.value,password.value)
                 }
             },
             shape = RoundedCornerShape(50.dp),
@@ -74,7 +72,7 @@ fun RegisterScreen(viewModel: ExpenzViewModel, navController: NavController) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var showPassword by remember { mutableStateOf(false) }
+        val showPassword by remember { mutableStateOf(false) }
 
         Spacer(modifier = Modifier.height(100.dp))
         Text(
@@ -152,5 +150,5 @@ fun RegisterScreen(viewModel: ExpenzViewModel, navController: NavController) {
 @Composable
 fun DefaultPreviewRegister() {
     val viewModel: ExpenzViewModel = viewModel()
-    RegisterScreen(viewModel, navController = rememberNavController())
+    RegisterScreen(viewModel)
 }

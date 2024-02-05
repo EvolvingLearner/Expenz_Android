@@ -1,50 +1,54 @@
 package com.money.expenz.ui.home
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.money.expenz.data.User
-import com.money.expenz.database.UserDatabase
 import com.money.expenz.repository.UserRepository
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 
 /**
  * ExpenzViewModel for communication with database, DAO , Repositories
  * to provide livedata objects to handle UI events
  */
-class ExpenzViewModel(application: Application) : AndroidViewModel(application) {
+class ExpenzViewModel(private val repository: UserRepository) : ViewModel() {
 
-    private var _isUserLoggedIn: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private var _isUserLoggedIn  = MutableLiveData(false)
 
-    val isUserLoggedIn: MutableStateFlow<Boolean> get() = _isUserLoggedIn
+    val isUserLoggedIn: LiveData<Boolean> get() = _isUserLoggedIn
 
-    private var users: List<User>
-
-    private var repository: UserRepository
+    private var dbusers: MutableList<User> = mutableListOf()
 
     init {
-        val userDb = UserDatabase.getInstance(application)
-        val userDAO = userDb.userDAO()
-        repository = UserRepository(userDAO)
-        users = repository.userData
-    }
-
-    fun getUserDetails(): List<User> {
-        return repository.userData
-    }
-
-    fun checkUserLoggedIn(userName: String, password: String): Boolean {
-        getUserDetails().forEach { user ->
-            _isUserLoggedIn.value =
-                user.userName == userName && user.password == password
-            Log.d("sailee", "Username " + user.userName)
-            Log.d("sailee", "password " + user.password)
+        viewModelScope.launch {
+            // Trigger the flow and consume its elements using collect
+            repository.userData.catch { exception -> notifyError(exception) }
+                .collect { users ->
+                    dbusers = users as MutableList<User>
+                }
         }
-        return _isUserLoggedIn.value
+    }
+
+    private fun notifyError(exception: Throwable) {
+        Log.d("Expenz", "Exception $exception")
+    }
+
+
+    fun checkUserInDB(userName: String, password: String): Boolean {
+        dbusers.forEach { user ->
+           if ((user.userName == userName) && (user.password == password)) {
+               _isUserLoggedIn.value = true
+               return true
+           }
+        }
+        return false
     }
 
     fun registerUser(registerUser: User) {
-        repository.insertUserData(registerUser)
-        _isUserLoggedIn.value = true
+        viewModelScope.launch { repository.insertUserData(registerUser) }
     }
+
 }

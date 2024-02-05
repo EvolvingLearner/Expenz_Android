@@ -18,7 +18,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,7 +26,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.money.expenz.model.ExpenzAppBar
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.ui.home.ExpenzViewModel
 
@@ -60,7 +58,7 @@ fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var showPassword by remember { mutableStateOf(false) }
+        val showPassword by remember { mutableStateOf(false) }
 
         Spacer(modifier = Modifier.height(100.dp))
         Text(
@@ -105,9 +103,8 @@ fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
         Box(modifier = Modifier.padding(start = 40.dp, end = 40.dp)) {
             Button(
                 onClick = {
-                    if (username.value.isEmpty() || password.value.isEmpty()) {
-                        Toast.makeText(context, "Enter valid data", Toast.LENGTH_SHORT).show()
-                    } else if (!viewModel.checkUserLoggedIn(username.value,password.value)){
+                    if (username.value.isEmpty() || password.value.isEmpty())
+                        Toast.makeText(context, "Enter valid data", Toast.LENGTH_SHORT).show() else if (!viewModel.checkUserInDB(username.value,password.value)){
                         Toast.makeText(context, "Invalid user", Toast.LENGTH_SHORT).show()
                     }
                 },
