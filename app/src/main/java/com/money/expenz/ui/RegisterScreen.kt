@@ -20,12 +20,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.money.expenz.data.User
 import com.money.expenz.model.ExpenzAppBar
 import com.money.expenz.ui.home.ExpenzViewModel
 
 @Composable
-fun RegisterScreen(viewModel: ExpenzViewModel) {
+fun RegisterScreen(viewModel: ExpenzViewModel,navController: NavController) {
     val username = remember { mutableStateOf("") }
     val email = remember { mutableStateOf("") }
     val country = remember { mutableStateOf("") }
@@ -51,7 +53,6 @@ fun RegisterScreen(viewModel: ExpenzViewModel) {
                         country = country.value
                     )
                     viewModel.registerUser(newUser)
-                    viewModel.checkUserInDB(username.value,password.value)
                 }
             },
             shape = RoundedCornerShape(50.dp),
@@ -150,5 +151,5 @@ fun RegisterScreen(viewModel: ExpenzViewModel) {
 @Composable
 fun DefaultPreviewRegister() {
     val viewModel: ExpenzViewModel = viewModel()
-    RegisterScreen(viewModel)
+    RegisterScreen(viewModel, navController = rememberNavController())
 }

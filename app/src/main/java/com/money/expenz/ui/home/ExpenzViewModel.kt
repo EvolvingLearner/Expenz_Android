@@ -7,14 +7,31 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.money.expenz.data.User
 import com.money.expenz.repository.UserRepository
-import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 /**
  * ExpenzViewModel for communication with database, DAO , Repositories
  * to provide livedata objects to handle UI events
  */
+
 class ExpenzViewModel(private val repository: UserRepository) : ViewModel() {
+
+    sealed class ViewState {
+        object Loading: ViewState() // hasLoggedIn = unknown
+        object LoggedIn: ViewState() // hasLoggedIn = true
+        object NotLoggedIn: ViewState() // hasLoggedIn = false
+    }
+
+    private val hasLoggedIn = MutableStateFlow(false)
+
+    val viewState = hasLoggedIn.map { hasLoggedIn ->
+        if (hasLoggedIn) {
+            ViewState.LoggedIn
+        } else {
+            ViewState.NotLoggedIn
+        }
+    }
 
     private var _isUserLoggedIn  = MutableLiveData(false)
 
@@ -41,6 +58,7 @@ class ExpenzViewModel(private val repository: UserRepository) : ViewModel() {
         dbusers.forEach { user ->
            if ((user.userName == userName) && (user.password == password)) {
                _isUserLoggedIn.value = true
+               setLoggedIn(true)
                return true
            }
         }
@@ -49,6 +67,11 @@ class ExpenzViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun registerUser(registerUser: User) {
         viewModelScope.launch { repository.insertUserData(registerUser) }
+        _isUserLoggedIn.value = true
+        setLoggedIn(true)
     }
 
+    fun setLoggedIn(boolean: Boolean){
+        hasLoggedIn.value = boolean
+    }
 }

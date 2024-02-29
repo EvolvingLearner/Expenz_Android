@@ -1,19 +1,16 @@
 package com.money.expenz
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.money.expenz.model.ExpenzAppBar
-import com.money.expenz.model.PreferenceManager
 import com.money.expenz.repository.UserRepository
 import com.money.expenz.ui.NavigationSetup
 import com.money.expenz.ui.Screen
@@ -33,23 +30,14 @@ open class BaseActivity : ComponentActivity() {
                 owner?.let {
                     val viewModel: ExpenzViewModel by viewModels { ViewModelFactory((application as ExpenzApplication).repository) }
                     val navController: NavHostController = rememberNavController()
-                    NavigationSetup(viewModel, navController = navController, Screen.Login.route)
+                    NavigationSetup(viewModel, navController = navController, Screen.Home.route)
 
-                    val preferencesManager =
-                        remember { PreferenceManager(application as ExpenzApplication) }
-                    val data =
-                        remember { mutableStateOf(preferencesManager.getData("Logged_in", false)) }
-
-                    // Use the data variable in your Composable
-                    viewModel.isUserLoggedIn.observe(this) { isLoggedIn ->
-                        preferencesManager.saveData("Logged_in", isLoggedIn)
-                        data.value = isLoggedIn
-                    }
-                    Log.d("Expenz", "isLoggedIn " + data.value)
-
-                    if (data.value) {
-                        navController.navigate(Screen.Home.route)
-                        ExpenzAppBar().AppBar(viewModel)
+                    val viewState by viewModel.viewState.collectAsState(initial = false)
+                    when (viewState) {
+                        ExpenzViewModel.ViewState.LoggedIn -> {
+                            navController.navigate(Screen.Home.route)
+                            ExpenzAppBar().AppBar(viewModel, navController)
+                        }
                     }
                 }
             }

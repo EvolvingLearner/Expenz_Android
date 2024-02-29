@@ -16,6 +16,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,9 +34,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.money.expenz.R
 import com.money.expenz.data.DataSource
-import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.data.Subscription
-import com.money.expenz.model.ExpenzAppBar
+import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.ui.Screen
 import com.money.expenz.ui.theme.Typography
 import com.money.expenz.ui.theme.greenTint
@@ -41,13 +43,23 @@ import com.money.expenz.ui.theme.redTint
 import com.money.expenz.ui.theme.yellow
 
 @Composable
-fun HomeScreen(viewModel: ExpenzViewModel,navController: NavController) {
-    Column(
-        Modifier.verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        PieChart(navController)
+fun HomeScreen(viewModel: ExpenzViewModel,navController: NavController,onNavigateToLoginScreen: () -> Unit = {}) {
+    val viewState by viewModel.viewState.collectAsState(initial = false)
+    when (viewState) {
+        ExpenzViewModel.ViewState.NotLoggedIn -> {
+            LaunchedEffect(viewState) {
+                onNavigateToLoginScreen()
+            }
+        }
+        ExpenzViewModel.ViewState.LoggedIn -> {
+            Column(
+                Modifier.verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                PieChart(navController)
+            }
+        }
     }
 }
 

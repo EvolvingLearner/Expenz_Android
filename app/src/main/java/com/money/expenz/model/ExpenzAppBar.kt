@@ -44,17 +44,20 @@ class ExpenzAppBar {
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @Composable
-    fun AppBar(viewModel: ExpenzViewModel, navController: NavHostController = rememberNavController() ) {
+    fun AppBar(
+        viewModel: ExpenzViewModel,
+        navController: NavHostController = rememberNavController()
+    ) {
         // Get current back stack entry
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route
-        // Get the name of the current screen
-        val currentScreen = Screen.valueOf(currentRoute ?: Screen.Home.route)
         Scaffold(
             topBar = {
                 TopAppBar(
-                    currentScreen = currentScreen,
-                    canNavigateBack = navController.previousBackStackEntry != null,
+                    currentScreen = Screen.valueOf(currentRoute ?: Screen.Home.route),
+                    canNavigateBack = navController.previousBackStackEntry != null && !currentRoute.equals(
+                        Screen.Home.route
+                    ),
                     navigateUp = { navController.navigateUp() }
                 )
             },
@@ -64,7 +67,7 @@ class ExpenzAppBar {
             backgroundColor = ExpenzTheme.colorScheme.background,
             contentColor = ExpenzTheme.colorScheme.onBackground
         ) { innerPadding ->
-            BaseContent(viewModel,innerPadding, navController)
+            BaseContent(viewModel, innerPadding, navController)
         }
     }
 
@@ -168,7 +171,11 @@ class ExpenzAppBar {
     }
 
     @Composable
-    fun BaseContent(viewModel: ExpenzViewModel,innerPaddingValues: PaddingValues, navController: NavHostController) {
+    fun BaseContent(
+        viewModel: ExpenzViewModel,
+        innerPaddingValues: PaddingValues,
+        navController: NavHostController
+    ) {
         Column(
             Modifier.padding(
                 paddingValues = PaddingValues(
@@ -181,7 +188,7 @@ class ExpenzAppBar {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            NavigationSetup(viewModel,navController = navController,Screen.Home.route)
+            NavigationSetup(viewModel, navController = navController, Screen.Home.route)
             //HomeScreen(viewModel, navController)
         }
     }

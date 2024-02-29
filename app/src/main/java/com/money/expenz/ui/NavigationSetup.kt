@@ -8,16 +8,22 @@ import com.money.expenz.ui.home.ExpenzViewModel
 import com.money.expenz.ui.home.HomeScreen
 
 @Composable
-fun NavigationSetup(viewModel: ExpenzViewModel, navController: NavHostController, startDestination: String) {
+fun NavigationSetup(
+    viewModel: ExpenzViewModel,
+    navController: NavHostController,
+    startDestination: String
+) {
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Screen.Login.route) {
             LoginScreen(viewModel, navController)
         }
         composable(Screen.Register.route) {
-            RegisterScreen(viewModel)
+            RegisterScreen(viewModel, navController)
         }
         composable(BottomNavItem.Home.route) {
-            HomeScreen(viewModel, navController)
+            HomeScreen(viewModel, navController, onNavigateToLoginScreen = {
+                navController.navigate(Screen.Login.route)
+            })
         }
         composable(BottomNavItem.Subscriptions.route) {
             SubscriptionsScreen(navController)
