@@ -1,44 +1,65 @@
 package com.money.expenz.ui.home
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowForward
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.money.expenz.R
 import com.money.expenz.data.DataSource
-import com.money.expenz.data.ExpenzAppBar.ExpenzTheme
-import com.money.expenz.model.Subscription
+import com.money.expenz.data.Subscription
+import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.ui.Screen
-import com.money.expenz.ui.theme.DarkSeaGreen
-import com.money.expenz.ui.theme.Orange
-import com.money.expenz.ui.theme.RedOrange
 import com.money.expenz.ui.theme.Typography
+import com.money.expenz.ui.theme.greenTint
+import com.money.expenz.ui.theme.redTint
+import com.money.expenz.ui.theme.yellow
 
 @Composable
-fun HomeScreen(navController: NavController) {
-    Column(
-        Modifier.verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        PieChart(navController)
+fun HomeScreen(viewModel: ExpenzViewModel,navController: NavController,onNavigateToLoginScreen: () -> Unit = {}) {
+    val viewState by viewModel.viewState.collectAsState(initial = false)
+    when (viewState) {
+        ExpenzViewModel.ViewState.NotLoggedIn -> {
+            LaunchedEffect(viewState) {
+                onNavigateToLoginScreen()
+            }
+        }
+        ExpenzViewModel.ViewState.LoggedIn -> {
+            Column(
+                Modifier.verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                PieChart(navController)
+            }
+        }
     }
 }
 
@@ -46,7 +67,9 @@ fun HomeScreen(navController: NavController) {
 @Composable
 internal fun PieChart(navController: NavController) {
 
-    val chartColors = listOf(RedOrange, DarkSeaGreen, Orange)
+    val chartColors = listOf(
+        greenTint, redTint, yellow
+    )
 
     val chartValues = listOf(90f, 80f, 40f)
 
@@ -64,7 +87,7 @@ internal fun PieChart(
     modifier: Modifier = Modifier,
     colors: List<Color>,
     inputValues: List<Float>,
-    legend: List<String> = listOf("Income", "Expense", "Subscriptions")
+    legend: List<String> = listOf("Income", "Expense", "Subscription")
 ) {
     val chartDegrees = 360f // circle shape
 
@@ -85,7 +108,8 @@ internal fun PieChart(
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(350.dp)
+                .height(310.dp)
+                .padding(start = 20.dp, end = 20.dp)
         ) {
 
             angleProgress.forEachIndexed { index, angle ->
@@ -122,11 +146,11 @@ fun DisplayLegend(color: Color, legend: String) {
             color = color
         )
 
-        Spacer(modifier = Modifier.width(4.dp))
+        Spacer(modifier = Modifier.width(10.dp))
 
         Text(
             text = legend,
-            color = ExpenzTheme.colorScheme.secondary
+            color = ExpenzTheme.colorScheme.onBackground
         )
     }
 }
@@ -136,15 +160,15 @@ fun TotalIncomeExpenseCard(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(top = 15.dp)
     ) {
         Card(
             modifier = Modifier
-                .padding(5.dp)
                 .height(150.dp)
                 .align(Alignment.CenterStart)
                 .clickable { navController.navigate(Screen.Details.route) },
             elevation = 10.dp,
-            backgroundColor = ExpenzTheme.colorScheme.inverseSurface
+            backgroundColor = ExpenzTheme.colorScheme.primaryContainer
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -155,7 +179,7 @@ fun TotalIncomeExpenseCard(navController: NavController) {
                     modifier = Modifier.padding(10.dp),
                     style = MaterialTheme.typography.headlineMedium,
                     fontSize = 25.sp,
-                    color = ExpenzTheme.colorScheme.onSecondary
+                    color = ExpenzTheme.colorScheme.onPrimaryContainer
                 )
 
                 Text(
@@ -163,7 +187,7 @@ fun TotalIncomeExpenseCard(navController: NavController) {
                     modifier = Modifier.padding(top = 25.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     fontSize = 20.sp,
-                    color = ExpenzTheme.colorScheme.onSecondary
+                    color = ExpenzTheme.colorScheme.onPrimaryContainer
                 )
             }
 
@@ -175,7 +199,7 @@ fun TotalIncomeExpenseCard(navController: NavController) {
                 .align(Alignment.CenterEnd)
                 .clickable { navController.navigate(Screen.Details.route) },
             elevation = 10.dp,
-            backgroundColor = ExpenzTheme.colorScheme.inverseSurface
+            backgroundColor = ExpenzTheme.colorScheme.primaryContainer
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -186,14 +210,14 @@ fun TotalIncomeExpenseCard(navController: NavController) {
                     modifier = Modifier.padding(10.dp),
                     style = ExpenzTheme.typography.headlineMedium,
                     fontSize = 25.sp,
-                    color = ExpenzTheme.colorScheme.onSecondary
+                    color = ExpenzTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
                     text = stringResource(id = R.string.total_amount),
                     modifier = Modifier.padding(top = 25.dp),
                     style = ExpenzTheme.typography.bodyMedium,
                     fontSize = 20.sp,
-                    color = ExpenzTheme.colorScheme.onSecondary
+                    color = ExpenzTheme.colorScheme.onPrimaryContainer
                 )
             }
 
@@ -205,27 +229,28 @@ fun TotalIncomeExpenseCard(navController: NavController) {
 @Composable
 fun SubscriptionList(subscriptions: List<Subscription>, navController: NavController) {
     Box(
-        modifier = Modifier
-            .padding(5.dp)
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(
             text = stringResource(id = R.string.subscriptions),
-            modifier = Modifier.padding(5.dp),
-            style = ExpenzTheme.typography.headlineLarge,
-            fontSize = 20.sp,
-            color = ExpenzTheme.colorScheme.onSurfaceVariant
-        )
-        Image(
-            painter = painterResource(R.drawable.ic_arrow_forward),
-            contentDescription = null,
             modifier = Modifier
                 .padding(5.dp)
-                .align(Alignment.CenterEnd)
-                .clickable {
-                    navController.navigate(Screen.Subscription.route)
-                }
+                .align(Alignment.CenterStart),
+            style = ExpenzTheme.typography.headlineLarge,
+            fontSize = 20.sp,
+            color = ExpenzTheme.colorScheme.onSurface
         )
+        IconButton(modifier = Modifier
+            .padding(5.dp)
+            .align(Alignment.CenterEnd), onClick = {
+            navController.navigate(Screen.Subscription.route)
+        }) {
+            Icon(
+                imageVector = Icons.Rounded.ArrowForward,
+                contentDescription = "",
+                tint = ExpenzTheme.colorScheme.onBackground
+            )
+        }
     }
 
     LazyRow {
@@ -237,31 +262,43 @@ fun SubscriptionList(subscriptions: List<Subscription>, navController: NavContro
 fun SubscriptionCard(subscription: Subscription, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
-            .padding(10.dp)
+            .padding(end = 15.dp, top = 5.dp, bottom = 10.dp)
             .width(180.dp)
             .height(70.dp),
         elevation = 8.dp,
-        backgroundColor = ExpenzTheme.colorScheme.tertiary
+        backgroundColor = ExpenzTheme.colorScheme.secondary
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            Image(
-                painter = painterResource(subscription.imageResourceId),
-                contentDescription = null,
+            Icon(
                 modifier = modifier.padding(5.dp),
-                contentScale = ContentScale.Crop
+                painter = painterResource(subscription.imageResourceId),
+                contentDescription = stringResource(id = R.string.amazon),
+                tint = ExpenzTheme.colorScheme.onSecondary
             )
             Text(
                 text = stringResource(subscription.stringResourceId),
                 modifier = modifier.padding(10.dp),
                 style = Typography.bodySmall,
                 fontSize = 20.sp,
-                color = ExpenzTheme.colorScheme.onTertiary,
+                color = ExpenzTheme.colorScheme.onSecondary,
                 overflow = TextOverflow.Ellipsis,
                 lineHeight = 1.5.em
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun HomeScreenPreview() {
+    Column(
+        Modifier.verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        PieChart(rememberNavController())
     }
 }

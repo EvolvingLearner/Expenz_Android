@@ -25,11 +25,35 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.money.expenz.R
-import com.money.expenz.data.ExpenzAppBar.ExpenzTheme
+import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import java.util.*
 
 @Composable
 fun AddScreen(navController: NavController) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(10.dp),
+    ) {
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(alignment = Alignment.BottomCenter),
+            onClick = {
+                navController.navigate(BottomNavItem.Home.route) {
+                    popUpTo(BottomNavItem.Home.route) { inclusive = true }
+                }
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = ExpenzTheme.colorScheme.primaryContainer),
+            shape = CutCornerShape(10)
+        ) {
+            Text(
+                text = stringResource(id = R.string.add),
+                color = ExpenzTheme.colorScheme.onSurfaceVariant,
+                style = ExpenzTheme.typography.labelLarge
+            )
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -78,25 +102,7 @@ fun setUpViews(navController: NavController) {
     Spacer(modifier = Modifier.width(20.dp))
     addNotes()
 
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(alignment = Alignment.BottomCenter),
-            onClick = { navController.navigate(BottomNavItem.Home.route) },
-            colors = ButtonDefaults.buttonColors(containerColor = ExpenzTheme.colorScheme.primaryContainer),
-            shape = CutCornerShape(10)
-        ) {
-            Text(
-                text = stringResource(id = R.string.add),
-                color = ExpenzTheme.colorScheme.onSurfaceVariant,
-                style = ExpenzTheme.typography.labelLarge
-            )
-        }
-    }
+
 }
 
 @Composable
@@ -277,7 +283,7 @@ fun addNotes() {
 
 @Preview
 @Composable
-fun DefaultPreview() {
+fun DefaultPreviewAdd() {
     Column(
         modifier = Modifier
             .fillMaxWidth()

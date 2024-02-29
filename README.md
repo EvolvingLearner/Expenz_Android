@@ -1,7 +1,9 @@
-<img src="/drawable/mipmap-hdpi/ic_launcher.webp" align="center" width="200">
 
-## About
-Expenz App lets you to manage your day to day Expenses.
+ 
+ ![Expenz](app/assets/dollar_icon.png) 
+
+  ## About
+Expenz App lets you to manage your day to day Expenses. 
 
 ## Features
  This Android App lets You to :
