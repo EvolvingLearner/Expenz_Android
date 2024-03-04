@@ -22,7 +22,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.money.expenz.R
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import java.util.*
@@ -59,14 +58,14 @@ fun AddScreen(navController: NavController) {
             .fillMaxHeight()
             .padding(10.dp)
     ) {
-        setUpViews(navController)
+        SetUpViews()
     }
 }
 
 @Composable
-fun setUpViews(navController: NavController) {
+fun SetUpViews() {
     val radioOptions = listOf("Income", "Expense", "Subscription")
-    var (selectedOption, onOptionSelected) = remember {
+    val (selectedOption, onOptionSelected) = remember {
         mutableStateOf(radioOptions[2])
     }
     Column(
@@ -95,17 +94,17 @@ fun setUpViews(navController: NavController) {
             }
         }
     }
-    setCategory()
+    SetCategory()
     Spacer(modifier = Modifier.width(20.dp))
-    setAmount()
+    SetAmount()
     Spacer(modifier = Modifier.width(20.dp))
-    setDate()
+    SetDate()
     Spacer(modifier = Modifier.width(20.dp))
-    addNotes()
+    AddNotes()
 }
 
 @Composable
-fun setCategory() {
+fun SetCategory() {
 
     var isExpanded by remember {
         mutableStateOf(false)
@@ -161,7 +160,7 @@ fun setCategory() {
 }
 
 @Composable
-fun setAmount() {
+fun SetAmount() {
     var amount by remember {
         mutableStateOf("")
     }
@@ -184,7 +183,7 @@ fun setAmount() {
 }
 
 @Composable
-fun setDate() {
+fun SetDate() {
     val mContext = LocalContext.current
     // Declaring integer values
     // for year, month and day
@@ -265,7 +264,7 @@ fun ReadonlyTextField(
 }
 
 @Composable
-fun addNotes() {
+fun AddNotes() {
     var notes by remember {
         mutableStateOf("")
     }
@@ -293,6 +292,6 @@ fun DefaultPreviewAdd() {
             .fillMaxHeight()
             .padding(10.dp)
     ) {
-        setUpViews(rememberNavController())
+        SetUpViews()
     }
 }

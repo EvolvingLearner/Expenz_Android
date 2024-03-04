@@ -5,8 +5,8 @@ import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -84,7 +84,7 @@ class ExpenzAppBar {
             contentColor = ExpenzTheme.colorScheme.onPrimary,
             actions = {
                 AppBarActionButton(
-                    imageVector = Icons.Outlined.ExitToApp,
+                    imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
                     description = "Logout",
                     onClick = {
                         localContext.finishAffinity()
@@ -95,7 +95,7 @@ class ExpenzAppBar {
             navigationIcon = {
                 if (canNavigateBack) {
                     AppBarActionButton(
-                        imageVector = Icons.Filled.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         description = "Back",
                         onClick = navigateUp
                     )
