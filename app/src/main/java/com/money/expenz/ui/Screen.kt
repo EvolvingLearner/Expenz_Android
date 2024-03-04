@@ -20,7 +20,6 @@ sealed class Screen(val route: String, @StringRes val title: Int) {
                 Subscription_Screen -> Subscription
                 Details_Screen -> Details
                 else -> Home
-
             }
     }
 }

@@ -19,20 +19,20 @@ abstract class UserDatabase : RoomDatabase() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
             INSTANCE?.let { database ->
-                    coroutineScope.launch {
-                        populateDatabase(database.userDAO())
-                    }
+                coroutineScope.launch {
+                    populateDatabase(database.userDAO())
                 }
             }
+        }
 
-            suspend fun populateDatabase(userDao: UserDAO) {
-                // Delete all content here.
-                // Add sample words.
-                var user = User(userName = "Sam")
-                userDao.insertUser(user)
-                user = User(password = "World!")
-                userDao.insertUser(user)
-            }
+        suspend fun populateDatabase(userDao: UserDAO) {
+            // Delete all content here.
+            // Add sample words.
+            var user = User(userName = "Sam")
+            userDao.insertUser(user)
+            user = User(password = "World!")
+            userDao.insertUser(user)
+        }
     }
 
     companion object {
@@ -44,15 +44,15 @@ abstract class UserDatabase : RoomDatabase() {
         fun getInstance(context: Context, coroutineScope: CoroutineScope): UserDatabase {
             // if the INSTANCE is not null, then return it,
             // if it is, then create the database
-                return INSTANCE ?: synchronized(this) {
-                    val instance = Room.databaseBuilder(
-                        context.applicationContext,
-                        UserDatabase::class.java,
-                        "user_database"
-                    ).addCallback(UserDatabaseCallBack(coroutineScope)).build()
-                    INSTANCE = instance
-                    instance
-                }
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    UserDatabase::class.java,
+                    "user_database"
+                ).addCallback(UserDatabaseCallBack(coroutineScope)).build()
+                INSTANCE = instance
+                instance
             }
+        }
     }
 }

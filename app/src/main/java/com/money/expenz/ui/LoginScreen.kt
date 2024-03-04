@@ -71,7 +71,7 @@ fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
             modifier = Modifier.fillMaxWidth(),
             label = { Text(text = "Username") },
             value = username.value,
-            onValueChange = { username.value = it},
+            onValueChange = { username.value = it },
             singleLine = true,
             trailingIcon = {
                 Icon(
@@ -93,7 +93,7 @@ fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
             },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            onValueChange = { password.value = it},
+            onValueChange = { password.value = it },
             trailingIcon = {
                 Icon(imageVector = Icons.Filled.Lock, contentDescription = "")
             }
@@ -104,7 +104,7 @@ fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
             Button(
                 onClick = {
                     if (username.value.isEmpty() || password.value.isEmpty())
-                        Toast.makeText(context, "Enter valid data", Toast.LENGTH_SHORT).show() else if (!viewModel.checkUserInDB(username.value,password.value)){
+                        Toast.makeText(context, "Enter valid data", Toast.LENGTH_SHORT).show() else if (!viewModel.checkUserInDB(username.value, password.value)) {
                         Toast.makeText(context, "Invalid user", Toast.LENGTH_SHORT).show()
                     }
                 },
@@ -116,7 +116,6 @@ fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
             ) {
                 Text(text = "Login", color = ExpenzTheme.colorScheme.onPrimaryContainer)
             }
-
         }
 
         Spacer(modifier = Modifier.height(20.dp))
