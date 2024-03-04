@@ -12,19 +12,19 @@ sealed class BottomNavItem(
     @StringRes val titleResId: Int,
     val icon: ImageVector
 ) {
-    object Home : BottomNavItem(
+    data object Home : BottomNavItem(
         route = Screen.Home.route,
         titleResId = Screen.Home.title,
         icon = Icons.Default.Home
     )
 
-    object Add : BottomNavItem(
+    data object Add : BottomNavItem(
         route = Screen.Add.route,
         titleResId = Screen.Add.title,
         icon = Icons.Default.AddCircle
     )
 
-    object Subscriptions : BottomNavItem(
+    data object Subscriptions : BottomNavItem(
         route = Screen.Subscription.route,
         titleResId = Screen.Subscription.title,
         icon = Icons.AutoMirrored.Filled.List
