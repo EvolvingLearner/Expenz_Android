@@ -1,6 +1,5 @@
 package com.money.expenz.ui
 
-
 import android.app.DatePickerDialog
 import android.widget.DatePicker
 import androidx.compose.foundation.clickable
@@ -75,17 +74,19 @@ fun setUpViews(navController: NavController) {
             .fillMaxWidth()
     ) {
         radioOptions.forEach { text ->
-            Row(modifier = Modifier
-                .selectable(
-                    selected = (selectedOption == text),
-                    onClick = { onOptionSelected(text) }
-                ),
+            Row(
+                modifier = Modifier
+                    .selectable(
+                        selected = (selectedOption == text),
+                        onClick = { onOptionSelected(text) }
+                    ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
                 RadioButton(
                     selected = (text == selectedOption),
-                    onClick = { onOptionSelected(text) })
+                    onClick = { onOptionSelected(text) }
+                )
                 Text(
                     text = text,
                     modifier = Modifier.padding(start = 2.dp),
@@ -101,8 +102,6 @@ fun setUpViews(navController: NavController) {
     setDate()
     Spacer(modifier = Modifier.width(20.dp))
     addNotes()
-
-
 }
 
 @Composable
@@ -146,15 +145,16 @@ fun setCategory() {
         DropdownMenu(
             modifier = Modifier.padding(5.dp),
             expanded = isExpanded,
-            onDismissRequest = { isExpanded = false }) {
+            onDismissRequest = { isExpanded = false }
+        ) {
             categories.forEach { category ->
                 DropdownMenuItem(
                     text = { Text(text = category) },
                     onClick = {
                         selectedCategory = category
                         isExpanded = false
-                    })
-
+                    }
+                )
             }
         }
     }
@@ -166,7 +166,8 @@ fun setAmount() {
         mutableStateOf("")
     }
     val textState = remember { mutableStateOf(TextFieldValue()) }
-    TextField(value = amount, onValueChange = { amount = it },
+    TextField(
+        value = amount, onValueChange = { amount = it },
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp),
@@ -181,7 +182,6 @@ fun setAmount() {
     )
     textState.value = TextFieldValue(amount)
 }
-
 
 @Composable
 fun setDate() {
@@ -209,8 +209,8 @@ fun setDate() {
     // initial values as current values (present year, month and day)
     val mDatePickerDialog = DatePickerDialog(
         mContext,
-        { _: DatePicker, mYear: Int, mMonth: Int, mDay: Int ->
-            mDate.value = "$mDay/${mMonth + 1}/$mYear"
+        { _: DatePicker, year: Int, month: Int, day: Int ->
+            mDate.value = "$day/${month + 1}/$year"
         },
         mYear,
         mMonth,
@@ -227,14 +227,16 @@ fun setDate() {
         val textState = remember { mutableStateOf(TextFieldValue()) }
 
         // click displays/shows the DatePickerDialog
-        ReadonlyTextField(value = textState.value,
+        ReadonlyTextField(
+            value = textState.value,
             onValueChange = { textState.value = it },
             onClick = {
                 mDatePickerDialog.show()
             },
             label = {
                 Text(text = "Date")
-            })
+            }
+        )
         textState.value = TextFieldValue(mDate.value)
     }
 }
@@ -268,7 +270,8 @@ fun addNotes() {
         mutableStateOf("")
     }
     val textState = remember { mutableStateOf(TextFieldValue()) }
-    TextField(value = notes, onValueChange = { if (notes.length <= 100) notes = it },
+    TextField(
+        value = notes, onValueChange = { if (notes.length <= 100) notes = it },
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)

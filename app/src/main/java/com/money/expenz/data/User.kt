@@ -4,7 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-
 @Entity(tableName = "User")
 data class User(
     @PrimaryKey(autoGenerate = true)
@@ -26,7 +25,6 @@ data class User(
 
 /*@ColumnInfo(name = "Subscription")
 var subscription: Nothing? = null)*/
-
 
 /*constructor() : this()
 

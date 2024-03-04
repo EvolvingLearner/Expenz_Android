@@ -17,7 +17,6 @@ import com.money.expenz.ui.Screen
 import com.money.expenz.ui.home.ExpenzViewModel
 import com.money.expenz.ui.theme.ExpenzTheme
 
-
 open class BaseActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

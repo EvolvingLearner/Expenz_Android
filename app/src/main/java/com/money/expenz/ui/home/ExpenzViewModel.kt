@@ -18,9 +18,9 @@ import kotlinx.coroutines.launch
 class ExpenzViewModel(private val repository: UserRepository) : ViewModel() {
 
     sealed class ViewState {
-        object Loading: ViewState() // hasLoggedIn = unknown
-        object LoggedIn: ViewState() // hasLoggedIn = true
-        object NotLoggedIn: ViewState() // hasLoggedIn = false
+        object Loading : ViewState() // hasLoggedIn = unknown
+        object LoggedIn : ViewState() // hasLoggedIn = true
+        object NotLoggedIn : ViewState() // hasLoggedIn = false
     }
 
     private val hasLoggedIn = MutableStateFlow(false)
@@ -33,7 +33,7 @@ class ExpenzViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    private var _isUserLoggedIn  = MutableLiveData(false)
+    private var _isUserLoggedIn = MutableLiveData(false)
 
     val isUserLoggedIn: LiveData<Boolean> get() = _isUserLoggedIn
 
@@ -53,14 +53,13 @@ class ExpenzViewModel(private val repository: UserRepository) : ViewModel() {
         Log.d("Expenz", "Exception $exception")
     }
 
-
     fun checkUserInDB(userName: String, password: String): Boolean {
         dbusers.forEach { user ->
-           if ((user.userName == userName) && (user.password == password)) {
-               _isUserLoggedIn.value = true
-               setLoggedIn(true)
-               return true
-           }
+            if ((user.userName == userName) && (user.password == password)) {
+                _isUserLoggedIn.value = true
+                setLoggedIn(true)
+                return true
+            }
         }
         return false
     }
@@ -71,7 +70,7 @@ class ExpenzViewModel(private val repository: UserRepository) : ViewModel() {
         setLoggedIn(true)
     }
 
-    fun setLoggedIn(boolean: Boolean){
+    fun setLoggedIn(boolean: Boolean) {
         hasLoggedIn.value = boolean
     }
 }

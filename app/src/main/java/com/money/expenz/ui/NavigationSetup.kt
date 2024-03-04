@@ -18,7 +18,7 @@ fun NavigationSetup(
             LoginScreen(viewModel, navController)
         }
         composable(Screen.Register.route) {
-            RegisterScreen(viewModel, navController)
+            RegisterScreen(viewModel)
         }
         composable(BottomNavItem.Home.route) {
             HomeScreen(viewModel, navController, onNavigateToLoginScreen = {

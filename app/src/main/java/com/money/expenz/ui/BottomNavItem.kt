@@ -6,7 +6,6 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.money.expenz.R
 
 sealed class BottomNavItem(
     val route: String,

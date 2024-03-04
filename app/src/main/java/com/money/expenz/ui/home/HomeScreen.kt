@@ -1,5 +1,6 @@
 package com.money.expenz.ui.home
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -43,7 +44,11 @@ import com.money.expenz.ui.theme.redTint
 import com.money.expenz.ui.theme.yellow
 
 @Composable
-fun HomeScreen(viewModel: ExpenzViewModel,navController: NavController,onNavigateToLoginScreen: () -> Unit = {}) {
+fun HomeScreen(
+    viewModel: ExpenzViewModel,
+    navController: NavController,
+    onNavigateToLoginScreen: () -> Unit = {}
+) {
     val viewState by viewModel.viewState.collectAsState(initial = false)
     when (viewState) {
         ExpenzViewModel.ViewState.NotLoggedIn -> {
@@ -63,7 +68,6 @@ fun HomeScreen(viewModel: ExpenzViewModel,navController: NavController,onNavigat
     }
 }
 
-
 @Composable
 internal fun PieChart(navController: NavController) {
 
@@ -81,6 +85,7 @@ internal fun PieChart(navController: NavController) {
     )
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 internal fun PieChart(
     navController: NavController,
@@ -123,7 +128,6 @@ internal fun PieChart(
                 )
                 startAngle += angle
             }
-
         }
     }
     Column(horizontalAlignment = Alignment.Start, verticalArrangement = Arrangement.Center) {
@@ -190,7 +194,6 @@ fun TotalIncomeExpenseCard(navController: NavController) {
                     color = ExpenzTheme.colorScheme.onPrimaryContainer
                 )
             }
-
         }
         Card(
             modifier = Modifier
@@ -220,7 +223,6 @@ fun TotalIncomeExpenseCard(navController: NavController) {
                     color = ExpenzTheme.colorScheme.onPrimaryContainer
                 )
             }
-
         }
     }
     SubscriptionList(subscriptions = DataSource().loadSubscriptions(), navController)
@@ -240,11 +242,14 @@ fun SubscriptionList(subscriptions: List<Subscription>, navController: NavContro
             fontSize = 20.sp,
             color = ExpenzTheme.colorScheme.onSurface
         )
-        IconButton(modifier = Modifier
-            .padding(5.dp)
-            .align(Alignment.CenterEnd), onClick = {
-            navController.navigate(Screen.Subscription.route)
-        }) {
+        IconButton(
+            modifier = Modifier
+                .padding(5.dp)
+                .align(Alignment.CenterEnd),
+            onClick = {
+                navController.navigate(Screen.Subscription.route)
+            }
+        ) {
             Icon(
                 imageVector = Icons.Rounded.ArrowForward,
                 contentDescription = "",

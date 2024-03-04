@@ -39,7 +39,6 @@ class ExpenzAppBar {
         val typography: Typography
             @Composable
             get() = MaterialTheme.typography
-
     }
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -89,7 +88,8 @@ class ExpenzAppBar {
                     description = "Logout",
                     onClick = {
                         localContext.finishAffinity()
-                    })
+                    }
+                )
             },
             modifier = modifier,
             navigationIcon = {
@@ -189,7 +189,7 @@ class ExpenzAppBar {
             verticalArrangement = Arrangement.Center
         ) {
             NavigationSetup(viewModel, navController = navController, Screen.Home.route)
-            //HomeScreen(viewModel, navController)
+            // HomeScreen(viewModel, navController)
         }
     }
 }

@@ -20,14 +20,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.money.expenz.data.User
 import com.money.expenz.model.ExpenzAppBar
 import com.money.expenz.ui.home.ExpenzViewModel
 
 @Composable
-fun RegisterScreen(viewModel: ExpenzViewModel,navController: NavController) {
+fun RegisterScreen(viewModel: ExpenzViewModel) {
     val username = remember { mutableStateOf("") }
     val email = remember { mutableStateOf("") }
     val country = remember { mutableStateOf("") }
@@ -93,9 +91,10 @@ fun RegisterScreen(viewModel: ExpenzViewModel,navController: NavController) {
                 Icon(
                     imageVector = (Icons.Filled.Clear),
                     contentDescription = "",
-                    modifier = Modifier.clickable { username.value =  "" },
+                    modifier = Modifier.clickable { username.value = "" },
                 )
-            })
+            }
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
@@ -113,7 +112,7 @@ fun RegisterScreen(viewModel: ExpenzViewModel,navController: NavController) {
             leadingIcon = { Icon(imageVector = Icons.Filled.Lock, contentDescription = "") },
             trailingIcon = {
                 Icon(
-                    modifier = Modifier.clickable { password.value =  "" },
+                    modifier = Modifier.clickable { password.value = "" },
                     imageVector = Icons.Filled.Clear,
                     contentDescription = ""
                 )
@@ -130,11 +129,12 @@ fun RegisterScreen(viewModel: ExpenzViewModel,navController: NavController) {
             leadingIcon = { Icon(imageVector = Icons.Filled.Email, contentDescription = "") },
             trailingIcon = {
                 Icon(
-                    modifier = Modifier.clickable { email.value =  "" },
+                    modifier = Modifier.clickable { email.value = "" },
                     imageVector = (Icons.Filled.Clear),
                     contentDescription = "clear"
                 )
-            })
+            }
+        )
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
             modifier = Modifier.fillMaxWidth(),
@@ -142,8 +142,8 @@ fun RegisterScreen(viewModel: ExpenzViewModel,navController: NavController) {
             value = country.value,
             onValueChange = { country.value = it },
             singleLine = true,
-            leadingIcon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") })
-
+            leadingIcon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") }
+        )
     }
 }
 
@@ -151,5 +151,5 @@ fun RegisterScreen(viewModel: ExpenzViewModel,navController: NavController) {
 @Composable
 fun DefaultPreviewRegister() {
     val viewModel: ExpenzViewModel = viewModel()
-    RegisterScreen(viewModel, navController = rememberNavController())
+    RegisterScreen(viewModel)
 }
