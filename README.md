@@ -11,3 +11,10 @@ Expenz App lets you to manage your day to day Expenses. This app Keeps track of 
  - Update the expenses if needed to.
  - Delete expenses.
  - Manage Subscriptions.
+
+## App Flow
+ <img align = "left" src='app/assets/Screenshot_20240319_151127.png' width ="250">  
+ <img align = "center" src='app/assets/Screenshot_20240319_151230.png' width = "250">
+ <img align = "left" src='app/assets/Screenshot_20240319_151419.png' width = "250">
+ <img align = "center" src='app/assets/Screenshot_20240319_151440.png' width = "250">
+   
