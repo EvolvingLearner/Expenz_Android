@@ -1,6 +1,5 @@
 package com.money.expenz.ui
 
-
 import android.app.DatePickerDialog
 import android.widget.DatePicker
 import androidx.compose.foundation.clickable
@@ -23,7 +22,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.money.expenz.R
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import java.util.*
@@ -60,14 +58,14 @@ fun AddScreen(navController: NavController) {
             .fillMaxHeight()
             .padding(10.dp)
     ) {
-        setUpViews(navController)
+        SetUpViews()
     }
 }
 
 @Composable
-fun setUpViews(navController: NavController) {
+fun SetUpViews() {
     val radioOptions = listOf("Income", "Expense", "Subscription")
-    var (selectedOption, onOptionSelected) = remember {
+    val (selectedOption, onOptionSelected) = remember {
         mutableStateOf(radioOptions[2])
     }
     Column(
@@ -75,17 +73,19 @@ fun setUpViews(navController: NavController) {
             .fillMaxWidth()
     ) {
         radioOptions.forEach { text ->
-            Row(modifier = Modifier
-                .selectable(
-                    selected = (selectedOption == text),
-                    onClick = { onOptionSelected(text) }
-                ),
+            Row(
+                modifier = Modifier
+                    .selectable(
+                        selected = (selectedOption == text),
+                        onClick = { onOptionSelected(text) }
+                    ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
                 RadioButton(
                     selected = (text == selectedOption),
-                    onClick = { onOptionSelected(text) })
+                    onClick = { onOptionSelected(text) }
+                )
                 Text(
                     text = text,
                     modifier = Modifier.padding(start = 2.dp),
@@ -94,19 +94,17 @@ fun setUpViews(navController: NavController) {
             }
         }
     }
-    setCategory()
+    SetCategory()
     Spacer(modifier = Modifier.width(20.dp))
-    setAmount()
+    SetAmount()
     Spacer(modifier = Modifier.width(20.dp))
-    setDate()
+    SetDate()
     Spacer(modifier = Modifier.width(20.dp))
-    addNotes()
-
-
+    AddNotes()
 }
 
 @Composable
-fun setCategory() {
+fun SetCategory() {
 
     var isExpanded by remember {
         mutableStateOf(false)
@@ -146,27 +144,29 @@ fun setCategory() {
         DropdownMenu(
             modifier = Modifier.padding(5.dp),
             expanded = isExpanded,
-            onDismissRequest = { isExpanded = false }) {
+            onDismissRequest = { isExpanded = false }
+        ) {
             categories.forEach { category ->
                 DropdownMenuItem(
                     text = { Text(text = category) },
                     onClick = {
                         selectedCategory = category
                         isExpanded = false
-                    })
-
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun setAmount() {
+fun SetAmount() {
     var amount by remember {
         mutableStateOf("")
     }
     val textState = remember { mutableStateOf(TextFieldValue()) }
-    TextField(value = amount, onValueChange = { amount = it },
+    TextField(
+        value = amount, onValueChange = { amount = it },
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp),
@@ -182,9 +182,8 @@ fun setAmount() {
     textState.value = TextFieldValue(amount)
 }
 
-
 @Composable
-fun setDate() {
+fun SetDate() {
     val mContext = LocalContext.current
     // Declaring integer values
     // for year, month and day
@@ -209,8 +208,8 @@ fun setDate() {
     // initial values as current values (present year, month and day)
     val mDatePickerDialog = DatePickerDialog(
         mContext,
-        { _: DatePicker, mYear: Int, mMonth: Int, mDay: Int ->
-            mDate.value = "$mDay/${mMonth + 1}/$mYear"
+        { _: DatePicker, year: Int, month: Int, day: Int ->
+            mDate.value = "$day/${month + 1}/$year"
         },
         mYear,
         mMonth,
@@ -227,14 +226,16 @@ fun setDate() {
         val textState = remember { mutableStateOf(TextFieldValue()) }
 
         // click displays/shows the DatePickerDialog
-        ReadonlyTextField(value = textState.value,
+        ReadonlyTextField(
+            value = textState.value,
             onValueChange = { textState.value = it },
             onClick = {
                 mDatePickerDialog.show()
             },
             label = {
                 Text(text = "Date")
-            })
+            }
+        )
         textState.value = TextFieldValue(mDate.value)
     }
 }
@@ -263,12 +264,13 @@ fun ReadonlyTextField(
 }
 
 @Composable
-fun addNotes() {
+fun AddNotes() {
     var notes by remember {
         mutableStateOf("")
     }
     val textState = remember { mutableStateOf(TextFieldValue()) }
-    TextField(value = notes, onValueChange = { if (notes.length <= 100) notes = it },
+    TextField(
+        value = notes, onValueChange = { if (notes.length <= 100) notes = it },
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
@@ -290,6 +292,6 @@ fun DefaultPreviewAdd() {
             .fillMaxHeight()
             .padding(10.dp)
     ) {
-        setUpViews(rememberNavController())
+        SetUpViews()
     }
 }

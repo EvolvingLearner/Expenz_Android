@@ -22,43 +22,43 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.money.expenz.data.DataSource
-import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.data.Subscription
+import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.ui.theme.Typography
 
 @Composable
 fun SubscriptionsScreen(navController: NavController) {
-    SubscriptionList(subscriptions = DataSource().loadSubscriptions(),navController)
+    SubscriptionList(subscriptions = DataSource().loadSubscriptions(), navController)
 }
 
 @Composable
-fun SubscriptionList(subscriptions: List<Subscription>,navController: NavController) {
+fun SubscriptionList(subscriptions: List<Subscription>, navController: NavController) {
     LazyColumn(modifier = Modifier.background(ExpenzTheme.colorScheme.onPrimary)) {
-        items(subscriptions) { subscription -> SubscriptionCard(subscription,navController) }
+        items(subscriptions) { subscription -> SubscriptionCard(subscription, navController) }
     }
 }
 
 @Composable
-fun SubscriptionCard(subscription: Subscription,navController: NavController) {
-        Row(
-            modifier = Modifier.clickable { navController.navigate(Screen.Details.route) },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Image(
-                painter = painterResource(subscription.imageResourceId),
-                contentDescription = null,
-                modifier = Modifier.padding(5.dp),
-                contentScale = ContentScale.Inside
-            )
-            Text(
-                text = stringResource(subscription.stringResourceId),
-                modifier = Modifier.padding(10.dp),
-                style = Typography.bodySmall,
-                fontSize = 25.sp,
-                overflow = TextOverflow.Ellipsis,
-                lineHeight = 1.5.em
-            )
-        }
+fun SubscriptionCard(subscription: Subscription, navController: NavController) {
+    Row(
+        modifier = Modifier.clickable { navController.navigate(Screen.Details.route) },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Image(
+            painter = painterResource(subscription.imageResourceId),
+            contentDescription = null,
+            modifier = Modifier.padding(5.dp),
+            contentScale = ContentScale.Inside
+        )
+        Text(
+            text = stringResource(subscription.stringResourceId),
+            modifier = Modifier.padding(10.dp),
+            style = Typography.bodySmall,
+            fontSize = 25.sp,
+            overflow = TextOverflow.Ellipsis,
+            lineHeight = 1.5.em
+        )
+    }
     Divider()
 }
