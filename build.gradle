@@ -4,6 +4,7 @@ buildscript {
         compose_ui_version = '1.6.2'
         nav_version = '2.7.7'
         room_version = '2.6.1'
+        coroutinesVersion = '1.9.0-RC'
     }
 }
 plugins {
