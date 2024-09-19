@@ -28,15 +28,12 @@
     <string name="total_income">Total Income</string>
     // Expense
     <string name="total_Expense">Total Expense</string>
-    <string name="total_amount">$10000</string>
+    <string name="dollar">$</string>
     <string name="amount">Amount</string>
     <string name="enter_amount">Enter Amount</string>
     <string name="notes">Notes</string>
     <string name="any_notes">Any notes?</string>
     <string name="category">Category</string>
     <string name="add">ADD</string>
-    <string name="large_text">
-        "Material is the metaphor.\n\n"
-    </string>
 
 </resources>

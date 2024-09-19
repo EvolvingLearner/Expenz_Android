@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 data class User(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "Id")
-    var id: Int = 1,
+    var id: Int = 0,
     @ColumnInfo(name = "Email")
     var email: String = "",
     @ColumnInfo(name = "UserName")
@@ -22,14 +22,3 @@ data class User(
     @ColumnInfo(name = "TotalExpense")
     var totalExpense: Long = 0
 )
-
-/*@ColumnInfo(name = "Subscription")
-var subscription: Nothing? = null)*/
-
-/*constructor() : this()
-
-constructor( userName: String, password: String , email : String){
-    this.userName = userName
-    this.password = password
-    this.email = email
-}*/

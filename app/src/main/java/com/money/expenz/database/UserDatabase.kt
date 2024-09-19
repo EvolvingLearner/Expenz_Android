@@ -5,12 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.money.expenz.data.IEDetails
 import com.money.expenz.data.User
 import com.money.expenz.model.UserDAO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Database(entities = [User::class], version = 1, exportSchema = true)
+@Database(entities = [User::class, IEDetails::class], version = 2, exportSchema = true)
 abstract class UserDatabase : RoomDatabase() {
 
     abstract fun userDAO(): UserDAO
@@ -26,12 +27,12 @@ abstract class UserDatabase : RoomDatabase() {
         }
 
         suspend fun populateDatabase(userDao: UserDAO) {
-            // Delete all content here.
-            // Add sample words.
-            var user = User(userName = "Sam")
+
+            val user = User(userName = "Sam", password = "abc@38", email = "vasu@gmail.com", country = "china")
             userDao.insertUser(user)
-            user = User(password = "World!")
-            userDao.insertUser(user)
+
+            val ieDetails = IEDetails(ie = "Income", category = "other", amount = 0, userId = 1)
+            userDao.insertIEDetails(ieDetails)
         }
     }
 
