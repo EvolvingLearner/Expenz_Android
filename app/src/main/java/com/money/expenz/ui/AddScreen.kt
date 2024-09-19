@@ -21,13 +21,25 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.money.expenz.R
+import com.money.expenz.data.IEDetails
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
+import com.money.expenz.ui.home.ExpenzViewModel
+import com.money.expenz.utils.Constants.Companion.expense
+import com.money.expenz.utils.Constants.Companion.income
+import com.money.expenz.utils.Constants.Companion.subscription
 import java.util.*
 
 @Composable
-fun AddScreen(navController: NavController) {
+fun AddScreen(navController: NavController, viewModel: ExpenzViewModel) {
+    var radioValue = remember { mutableStateOf("") }
+    var category = remember { mutableStateOf("") }
+    var amount = remember { mutableStateOf("") }
+    var date = remember { mutableStateOf("") }
+    var notes = remember { mutableStateOf("") }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -38,6 +50,18 @@ fun AddScreen(navController: NavController) {
                 .fillMaxWidth()
                 .align(alignment = Alignment.BottomCenter),
             onClick = {
+                val ieDetails = viewModel.loggedInUserId.value?.let {
+                    IEDetails(
+                        ie = radioValue.value,
+                        category = category.value,
+                        amount = amount.value.toInt(),
+                        date = date.value,
+                        notes = notes.value,
+                        userId = it
+                    )
+                }
+                viewModel.insertIEDetails(ieDetails!!)
+                viewModel.updateUserDetails(amount.value.toInt(), radioValue.value)
                 navController.navigate(BottomNavItem.Home.route) {
                     popUpTo(BottomNavItem.Home.route) { inclusive = true }
                 }
@@ -58,185 +82,187 @@ fun AddScreen(navController: NavController) {
             .fillMaxHeight()
             .padding(10.dp)
     ) {
-        SetUpViews()
-    }
-}
-
-@Composable
-fun SetUpViews() {
-    val radioOptions = listOf("Income", "Expense", "Subscription")
-    val (selectedOption, onOptionSelected) = remember {
-        mutableStateOf(radioOptions[2])
-    }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        radioOptions.forEach { text ->
-            Row(
-                modifier = Modifier
-                    .selectable(
-                        selected = (selectedOption == text),
-                        onClick = { onOptionSelected(text) }
-                    ),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                RadioButton(
-                    selected = (text == selectedOption),
-                    onClick = { onOptionSelected(text) }
-                )
-                Text(
-                    text = text,
-                    modifier = Modifier.padding(start = 2.dp),
-                    color = ExpenzTheme.colorScheme.onSurfaceVariant
-                )
-            }
+        // set Radio options
+        val radioOptions = listOf(income, expense, subscription)
+        val (selectedOption, onOptionSelected) = remember {
+            mutableStateOf(radioOptions[2])
         }
-    }
-    SetCategory()
-    Spacer(modifier = Modifier.width(20.dp))
-    SetAmount()
-    Spacer(modifier = Modifier.width(20.dp))
-    SetDate()
-    Spacer(modifier = Modifier.width(20.dp))
-    AddNotes()
-}
-
-@Composable
-fun SetCategory() {
-
-    var isExpanded by remember {
-        mutableStateOf(false)
-    }
-    var selectedCategory by remember {
-        mutableStateOf("")
-    }
-    val categories = listOf(
-        "Media",
-        "Electricity",
-        "Travel",
-        "Food",
-        "Shopping",
-        "Gas",
-        "Internet",
-        "Medical",
-        "Pets",
-        "Others"
-    )
-
-    val icon = if (isExpanded) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp
-    Column(
-        modifier = Modifier
-            .padding(5.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.Start
-    ) {
-        OutlinedTextField(
-            value = selectedCategory,
-            onValueChange = { selectedCategory = it },
-            trailingIcon = { Icon(icon, "", Modifier.clickable { isExpanded = !isExpanded }) },
+        Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            label = { Text(text = stringResource(id = R.string.category)) }
-        )
-
-        DropdownMenu(
-            modifier = Modifier.padding(5.dp),
-            expanded = isExpanded,
-            onDismissRequest = { isExpanded = false }
+                .fillMaxWidth()
         ) {
-            categories.forEach { category ->
-                DropdownMenuItem(
-                    text = { Text(text = category) },
-                    onClick = {
-                        selectedCategory = category
-                        isExpanded = false
-                    }
-                )
+            radioOptions.forEach { text ->
+                Row(
+                    modifier = Modifier
+                        .selectable(
+                            selected = (selectedOption == text),
+                            onClick = { onOptionSelected(text) }
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    RadioButton(
+                        selected = (text == selectedOption),
+                        onClick = { onOptionSelected(text) }
+                    )
+                    Text(
+                        text = text,
+                        modifier = Modifier.padding(start = 2.dp),
+                        color = ExpenzTheme.colorScheme.onSurfaceVariant
+                    )
+                    radioValue.value = selectedOption
+                }
             }
         }
-    }
-}
 
-@Composable
-fun SetAmount() {
-    var amount by remember {
-        mutableStateOf("")
-    }
-    val textState = remember { mutableStateOf(TextFieldValue()) }
-    TextField(
-        value = amount, onValueChange = { amount = it },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(5.dp),
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Done
-        ),
-        label = {
-            Text(text = stringResource(id = R.string.amount))
-        },
-        placeholder = { Text(text = stringResource(id = R.string.enter_amount)) }
-    )
-    textState.value = TextFieldValue(amount)
-}
-
-@Composable
-fun SetDate() {
-    val mContext = LocalContext.current
-    // Declaring integer values
-    // for year, month and day
-    val mYear: Int
-    val mMonth: Int
-    val mDay: Int
-
-    // Initializing a Calendar
-    val mCalendar = Calendar.getInstance()
-
-    // Fetching current year, month and day
-    mYear = mCalendar.get(Calendar.YEAR)
-    mMonth = mCalendar.get(Calendar.MONTH)
-    mDay = mCalendar.get(Calendar.DAY_OF_MONTH)
-
-    mCalendar.time = Date()
-
-    // Declaring a string value to store date in string format
-    val mDate = remember { mutableStateOf("") }
-
-    // Declaring DatePickerDialog and setting
-    // initial values as current values (present year, month and day)
-    val mDatePickerDialog = DatePickerDialog(
-        mContext,
-        { _: DatePicker, year: Int, month: Int, day: Int ->
-            mDate.value = "$day/${month + 1}/$year"
-        },
-        mYear,
-        mMonth,
-        mDay
-    )
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(5.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.Start
-    ) {
-        val textState = remember { mutableStateOf(TextFieldValue()) }
-
-        // click displays/shows the DatePickerDialog
-        ReadonlyTextField(
-            value = textState.value,
-            onValueChange = { textState.value = it },
-            onClick = {
-                mDatePickerDialog.show()
-            },
-            label = {
-                Text(text = "Date")
-            }
+        // Set Category
+        var isExpanded by remember {
+            mutableStateOf(false)
+        }
+        val categories = listOf(
+            "Media",
+            "Electricity",
+            "Travel",
+            "Food",
+            "Shopping",
+            "Gas",
+            "Internet",
+            "Medical",
+            "Pets",
+            "Others"
         )
-        textState.value = TextFieldValue(mDate.value)
+
+        val icon = if (isExpanded) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp
+        Column(
+            modifier = Modifier
+                .padding(5.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start
+        ) {
+            OutlinedTextField(
+                value = category.value,
+                onValueChange = { category.value = it },
+                trailingIcon = { Icon(icon, "", Modifier.clickable { isExpanded = !isExpanded }) },
+                modifier = Modifier
+                    .fillMaxWidth(),
+                label = { Text(text = stringResource(id = R.string.category)) }
+            )
+
+            DropdownMenu(
+                modifier = Modifier.padding(5.dp),
+                expanded = isExpanded,
+                onDismissRequest = { isExpanded = false }
+
+            ) {
+                categories.forEach { categorySelected ->
+                    DropdownMenuItem(
+                        text = { Text(text = categorySelected) },
+                        onClick = {
+                            category.value = categorySelected
+                            isExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+        // Line Space
+        Spacer(modifier = Modifier.width(20.dp))
+
+        // Set Amount
+        val textFieldValue = remember { mutableStateOf(TextFieldValue()) }
+        TextField(
+            value = amount.value, onValueChange = { amount.value = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
+            label = {
+                Text(text = stringResource(id = R.string.amount))
+            },
+            placeholder = { Text(text = stringResource(id = R.string.enter_amount)) }
+        )
+        textFieldValue.value = TextFieldValue(amount.value)
+
+        // Line Space
+        Spacer(modifier = Modifier.width(20.dp))
+
+        // Set Date
+        val mContext = LocalContext.current
+        // Declaring integer values
+        // for year, month and day
+        val mYear: Int
+        val mMonth: Int
+        val mDay: Int
+
+        // Initializing a Calendar
+        val mCalendar = Calendar.getInstance()
+
+        // Fetching current year, month and day
+        mYear = mCalendar.get(Calendar.YEAR)
+        mMonth = mCalendar.get(Calendar.MONTH)
+        mDay = mCalendar.get(Calendar.DAY_OF_MONTH)
+
+        mCalendar.time = Date()
+
+        // Declaring a string value to store date in string format
+        val mDate = remember { mutableStateOf("") }
+
+        // Declaring DatePickerDialog and setting
+        // initial values as current values (present year, month and day)
+        val mDatePickerDialog = DatePickerDialog(
+            mContext,
+            { _: DatePicker, year: Int, month: Int, day: Int ->
+                mDate.value = "$day/${month + 1}/$year"
+            },
+            mYear,
+            mMonth,
+            mDay
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start
+        ) {
+            val textState = remember { mutableStateOf(TextFieldValue()) }
+
+            // click displays/shows the DatePickerDialog
+            ReadonlyTextField(
+                value = textState.value,
+                onValueChange = { textState.value = it },
+                onClick = {
+                    mDatePickerDialog.show()
+                },
+                label = {
+                    Text(text = "Date")
+                }
+            )
+            textState.value = TextFieldValue(mDate.value)
+            date.value = mDate.value
+        }
+
+        // Line Space
+        Spacer(modifier = Modifier.width(20.dp))
+
+        // Set Notes
+        val textStateNotes = remember { mutableStateOf(TextFieldValue()) }
+        TextField(
+            value = notes.value, onValueChange = { if (notes.value.length <= 100) notes.value = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .padding(5.dp),
+            label = {
+                Text(text = stringResource(id = R.string.notes))
+            },
+            placeholder = { Text(text = stringResource(id = R.string.any_notes)) }
+        )
+        textStateNotes.value = TextFieldValue(notes.value)
     }
 }
 
@@ -263,35 +289,9 @@ fun ReadonlyTextField(
     }
 }
 
-@Composable
-fun AddNotes() {
-    var notes by remember {
-        mutableStateOf("")
-    }
-    val textState = remember { mutableStateOf(TextFieldValue()) }
-    TextField(
-        value = notes, onValueChange = { if (notes.length <= 100) notes = it },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .padding(5.dp),
-        label = {
-            Text(text = stringResource(id = R.string.notes))
-        },
-        placeholder = { Text(text = stringResource(id = R.string.any_notes)) }
-    )
-    textState.value = TextFieldValue(notes)
-}
-
 @Preview
 @Composable
 fun DefaultPreviewAdd() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(10.dp)
-    ) {
-        SetUpViews()
-    }
+    val viewModel: ExpenzViewModel = viewModel()
+    AddScreen(rememberNavController(), viewModel)
 }

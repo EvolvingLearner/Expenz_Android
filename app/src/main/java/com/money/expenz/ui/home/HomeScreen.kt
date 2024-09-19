@@ -3,7 +3,16 @@ package com.money.expenz.ui.home
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,12 +46,16 @@ import androidx.navigation.compose.rememberNavController
 import com.money.expenz.R
 import com.money.expenz.data.DataSource
 import com.money.expenz.data.Subscription
+import com.money.expenz.data.User
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.ui.Screen
+import com.money.expenz.ui.theme.Black
+import com.money.expenz.ui.theme.Pink80
+import com.money.expenz.ui.theme.PurpleGrey80
 import com.money.expenz.ui.theme.Typography
-import com.money.expenz.ui.theme.greenTint
-import com.money.expenz.ui.theme.redTint
-import com.money.expenz.ui.theme.yellow
+import com.money.expenz.utils.Constants.Companion.expense
+import com.money.expenz.utils.Constants.Companion.income
+import com.money.expenz.utils.Constants.Companion.subscription
 
 @Composable
 fun HomeScreen(
@@ -56,29 +70,34 @@ fun HomeScreen(
                 onNavigateToLoginScreen()
             }
         }
+
         ExpenzViewModel.ViewState.LoggedIn -> {
+            val user = viewModel.loggedInUser.observeAsState().value
             Column(
                 Modifier.verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                PieChart(navController)
+                if (user != null) {
+                    PieChart(navController, user)
+                }
             }
         }
     }
 }
 
 @Composable
-internal fun PieChart(navController: NavController) {
+internal fun PieChart(navController: NavController, user: User) {
 
     val chartColors = listOf(
-        greenTint, redTint, yellow
+        PurpleGrey80, Black, Pink80
     )
 
     val chartValues = listOf(90f, 80f, 40f)
 
     PieChart(
         navController = navController,
+        user = user,
         modifier = Modifier.padding(7.dp),
         colors = chartColors,
         inputValues = chartValues
@@ -89,10 +108,11 @@ internal fun PieChart(navController: NavController) {
 @Composable
 internal fun PieChart(
     navController: NavController,
+    user: User,
     modifier: Modifier = Modifier,
     colors: List<Color>,
     inputValues: List<Float>,
-    legend: List<String> = listOf("Income", "Expense", "Subscription")
+    legend: List<String> = listOf(income, expense, subscription)
 ) {
     val chartDegrees = 360f // circle shape
 
@@ -135,7 +155,7 @@ internal fun PieChart(
             DisplayLegend(color = colors[i], legend = legend[i])
         }
     }
-    TotalIncomeExpenseCard(navController)
+    TotalIncomeExpenseCard(navController, user)
 }
 
 @Composable
@@ -160,7 +180,7 @@ fun DisplayLegend(color: Color, legend: String) {
 }
 
 @Composable
-fun TotalIncomeExpenseCard(navController: NavController) {
+fun TotalIncomeExpenseCard(navController: NavController, user: User) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -187,7 +207,7 @@ fun TotalIncomeExpenseCard(navController: NavController) {
                 )
 
                 Text(
-                    text = stringResource(id = R.string.total_amount),
+                    text = stringResource(id = R.string.dollar) + user.totalIncome.toString(),
                     modifier = Modifier.padding(top = 25.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     fontSize = 20.sp,
@@ -216,7 +236,7 @@ fun TotalIncomeExpenseCard(navController: NavController) {
                     color = ExpenzTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
-                    text = stringResource(id = R.string.total_amount),
+                    text = stringResource(id = R.string.dollar) + user.totalExpense.toString(),
                     modifier = Modifier.padding(top = 25.dp),
                     style = ExpenzTheme.typography.bodyMedium,
                     fontSize = 20.sp,
@@ -304,6 +324,6 @@ fun HomeScreenPreview() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        PieChart(rememberNavController())
+        PieChart(rememberNavController(), User())
     }
 }

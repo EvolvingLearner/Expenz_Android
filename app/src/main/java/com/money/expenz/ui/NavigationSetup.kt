@@ -29,7 +29,7 @@ fun NavigationSetup(
             SubscriptionsScreen(navController)
         }
         composable(BottomNavItem.Add.route) {
-            AddScreen(navController)
+            AddScreen(navController, viewModel)
         }
         composable(Screen.Details.route) {
             DetailsScreen()

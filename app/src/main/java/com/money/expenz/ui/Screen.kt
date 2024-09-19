@@ -15,6 +15,7 @@ sealed class Screen(val route: String, @StringRes val title: Int) {
         fun valueOf(route: String?) =
             when (route) {
                 Login_Screen -> Login
+                Register_Screen -> Register
                 Home_Screen -> Home
                 Add_Screen -> Add
                 Subscription_Screen -> Subscription

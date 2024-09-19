@@ -25,7 +25,7 @@ fun DetailsScreen() {
         )
 
         Text(
-            text = stringResource(id = R.string.total_amount),
+            text = stringResource(id = R.string.dollar),
             modifier = Modifier.padding(10.dp),
             style = MaterialTheme.typography.headlineMedium,
             fontSize = 25.sp,
