@@ -126,4 +126,9 @@ class ExpenzViewModel(private val repository: UserRepository) : ViewModel() {
     fun setLoggedIn(boolean: Boolean) {
         hasLoggedIn.value = boolean
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        job?.cancel()
+    }
 }
