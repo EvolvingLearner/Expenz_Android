@@ -10,23 +10,23 @@ import androidx.compose.ui.graphics.vector.ImageVector
 sealed class BottomNavItem(
     val route: String,
     @StringRes val titleResId: Int,
-    val icon: ImageVector
+    val icon: ImageVector,
 ) {
     data object Home : BottomNavItem(
         route = Screen.Home.route,
         titleResId = Screen.Home.title,
-        icon = Icons.Default.Home
+        icon = Icons.Default.Home,
     )
 
     data object Add : BottomNavItem(
         route = Screen.Add.route,
         titleResId = Screen.Add.title,
-        icon = Icons.Default.AddCircle
+        icon = Icons.Default.AddCircle,
     )
 
     data object Subscriptions : BottomNavItem(
         route = Screen.Subscription.route,
         titleResId = Screen.Subscription.title,
-        icon = Icons.AutoMirrored.Filled.List
+        icon = Icons.AutoMirrored.Filled.List,
     )
 }

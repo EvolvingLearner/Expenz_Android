@@ -28,38 +28,44 @@ import com.money.expenz.R
 import com.money.expenz.data.IEDetails
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.ui.home.ExpenzViewModel
-import com.money.expenz.utils.Constants.Companion.expense
-import com.money.expenz.utils.Constants.Companion.income
-import com.money.expenz.utils.Constants.Companion.subscription
+import com.money.expenz.utils.ExpenzUtil.Companion.EXPENSE
+import com.money.expenz.utils.ExpenzUtil.Companion.INCOME
+import com.money.expenz.utils.ExpenzUtil.Companion.SUBSCRIPTION
 import java.util.*
 
 @Composable
-fun AddScreen(navController: NavController, viewModel: ExpenzViewModel) {
-    var radioValue = remember { mutableStateOf("") }
-    var category = remember { mutableStateOf("") }
-    var amount = remember { mutableStateOf("") }
-    var date = remember { mutableStateOf("") }
-    var notes = remember { mutableStateOf("") }
+fun AddScreen(
+    navController: NavController,
+    viewModel: ExpenzViewModel,
+) {
+    val radioValue = remember { mutableStateOf("") }
+    val category = remember { mutableStateOf("") }
+    val amount = remember { mutableStateOf("") }
+    val date = remember { mutableStateOf("") }
+    val notes = remember { mutableStateOf("") }
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .padding(10.dp),
     ) {
         Button(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .align(alignment = Alignment.BottomCenter),
             onClick = {
-                val ieDetails = viewModel.loggedInUserId.value?.let {
-                    IEDetails(
-                        ie = radioValue.value,
-                        category = category.value,
-                        amount = amount.value.toInt(),
-                        date = date.value,
-                        notes = notes.value,
-                        userId = it
-                    )
-                }
+                val ieDetails =
+                    viewModel.loggedInUserId.value?.let {
+                        IEDetails(
+                            ie = radioValue.value,
+                            category = category.value,
+                            amount = amount.value.toIntOrNull() ?: 0,
+                            date = date.value,
+                            notes = notes.value,
+                            userId = it,
+                        )
+                    }
                 viewModel.insertIEDetails(ieDetails!!)
                 viewModel.updateUserDetails(amount.value.toInt(), radioValue.value)
                 navController.navigate(BottomNavItem.Home.route) {
@@ -67,48 +73,52 @@ fun AddScreen(navController: NavController, viewModel: ExpenzViewModel) {
                 }
             },
             colors = ButtonDefaults.buttonColors(containerColor = ExpenzTheme.colorScheme.primaryContainer),
-            shape = CutCornerShape(10)
+            shape = CutCornerShape(10),
         ) {
             Text(
                 text = stringResource(id = R.string.add),
                 color = ExpenzTheme.colorScheme.onSurfaceVariant,
-                style = ExpenzTheme.typography.labelLarge
+                style = ExpenzTheme.typography.labelLarge,
             )
         }
     }
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .padding(10.dp)
+            .padding(10.dp),
     ) {
         // set Radio options
-        val radioOptions = listOf(income, expense, subscription)
-        val (selectedOption, onOptionSelected) = remember {
-            mutableStateOf(radioOptions[2])
-        }
+        val radioOptions = listOf(INCOME, EXPENSE, SUBSCRIPTION)
+        val (selectedOption, onOptionSelected) =
+            remember {
+                mutableStateOf(radioOptions[2])
+            }
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier =
+            Modifier
+                .fillMaxWidth(),
         ) {
             radioOptions.forEach { text ->
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .selectable(
                             selected = (selectedOption == text),
-                            onClick = { onOptionSelected(text) }
+                            onClick = { onOptionSelected(text) },
                         ),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Center,
                 ) {
                     RadioButton(
                         selected = (text == selectedOption),
-                        onClick = { onOptionSelected(text) }
+                        onClick = { onOptionSelected(text) },
                     )
                     Text(
                         text = text,
                         modifier = Modifier.padding(start = 2.dp),
-                        color = ExpenzTheme.colorScheme.onSurfaceVariant
+                        color = ExpenzTheme.colorScheme.onSurfaceVariant,
                     )
                     radioValue.value = selectedOption
                 }
@@ -119,40 +129,42 @@ fun AddScreen(navController: NavController, viewModel: ExpenzViewModel) {
         var isExpanded by remember {
             mutableStateOf(false)
         }
-        val categories = listOf(
-            "Media",
-            "Electricity",
-            "Travel",
-            "Food",
-            "Shopping",
-            "Gas",
-            "Internet",
-            "Medical",
-            "Pets",
-            "Others"
-        )
+        val categories =
+            listOf(
+                "Media",
+                "Electricity",
+                "Travel",
+                "Food",
+                "Shopping",
+                "Gas",
+                "Internet",
+                "Medical",
+                "Pets",
+                "Others",
+            )
 
         val icon = if (isExpanded) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .padding(5.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.Start,
         ) {
             OutlinedTextField(
                 value = category.value,
                 onValueChange = { category.value = it },
                 trailingIcon = { Icon(icon, "", Modifier.clickable { isExpanded = !isExpanded }) },
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth(),
-                label = { Text(text = stringResource(id = R.string.category)) }
+                label = { Text(text = stringResource(id = R.string.category)) },
             )
 
             DropdownMenu(
                 modifier = Modifier.padding(5.dp),
                 expanded = isExpanded,
-                onDismissRequest = { isExpanded = false }
-
+                onDismissRequest = { isExpanded = false },
             ) {
                 categories.forEach { categorySelected ->
                     DropdownMenuItem(
@@ -160,7 +172,7 @@ fun AddScreen(navController: NavController, viewModel: ExpenzViewModel) {
                         onClick = {
                             category.value = categorySelected
                             isExpanded = false
-                        }
+                        },
                     )
                 }
             }
@@ -171,18 +183,21 @@ fun AddScreen(navController: NavController, viewModel: ExpenzViewModel) {
         // Set Amount
         val textFieldValue = remember { mutableStateOf(TextFieldValue()) }
         TextField(
-            value = amount.value, onValueChange = { amount.value = it },
-            modifier = Modifier
+            value = amount.value,
+            onValueChange = { amount.value = it },
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(5.dp),
-            keyboardOptions = KeyboardOptions(
+            keyboardOptions =
+            KeyboardOptions(
                 keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
+                imeAction = ImeAction.Done,
             ),
             label = {
                 Text(text = stringResource(id = R.string.amount))
             },
-            placeholder = { Text(text = stringResource(id = R.string.enter_amount)) }
+            placeholder = { Text(text = stringResource(id = R.string.enter_amount)) },
         )
         textFieldValue.value = TextFieldValue(amount.value)
 
@@ -212,22 +227,24 @@ fun AddScreen(navController: NavController, viewModel: ExpenzViewModel) {
 
         // Declaring DatePickerDialog and setting
         // initial values as current values (present year, month and day)
-        val mDatePickerDialog = DatePickerDialog(
-            mContext,
-            { _: DatePicker, year: Int, month: Int, day: Int ->
-                mDate.value = "$day/${month + 1}/$year"
-            },
-            mYear,
-            mMonth,
-            mDay
-        )
+        val mDatePickerDialog =
+            DatePickerDialog(
+                mContext,
+                { _: DatePicker, year: Int, month: Int, day: Int ->
+                    mDate.value = "$day/${month + 1}/$year"
+                },
+                mYear,
+                mMonth,
+                mDay,
+            )
 
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(5.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.Start,
         ) {
             val textState = remember { mutableStateOf(TextFieldValue()) }
 
@@ -240,7 +257,7 @@ fun AddScreen(navController: NavController, viewModel: ExpenzViewModel) {
                 },
                 label = {
                     Text(text = "Date")
-                }
+                },
             )
             textState.value = TextFieldValue(mDate.value)
             date.value = mDate.value
@@ -252,15 +269,17 @@ fun AddScreen(navController: NavController, viewModel: ExpenzViewModel) {
         // Set Notes
         val textStateNotes = remember { mutableStateOf(TextFieldValue()) }
         TextField(
-            value = notes.value, onValueChange = { if (notes.value.length <= 100) notes.value = it },
-            modifier = Modifier
+            value = notes.value,
+            onValueChange = { if (notes.value.length <= 100) notes.value = it },
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .height(100.dp)
                 .padding(5.dp),
             label = {
                 Text(text = stringResource(id = R.string.notes))
             },
-            placeholder = { Text(text = stringResource(id = R.string.any_notes)) }
+            placeholder = { Text(text = stringResource(id = R.string.any_notes)) },
         )
         textStateNotes.value = TextFieldValue(notes.value)
     }
@@ -272,17 +291,18 @@ fun ReadonlyTextField(
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    label: @Composable () -> Unit
+    label: @Composable () -> Unit,
 ) {
     Box {
         TextField(
             value = value,
             onValueChange = onValueChange,
             modifier = modifier,
-            label = label
+            label = label,
         )
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .matchParentSize()
                 .clickable(onClick = onClick),
         )

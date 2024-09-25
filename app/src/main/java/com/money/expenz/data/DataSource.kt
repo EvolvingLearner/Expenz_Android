@@ -3,7 +3,6 @@ package com.money.expenz.data
 import com.money.expenz.R
 
 class DataSource {
-
     fun loadSubscriptions(): List<Subscription> {
         return listOf(
             Subscription(R.string.netflix, R.drawable.ic_category_media),

@@ -11,7 +11,7 @@ import com.money.expenz.ui.home.HomeScreen
 fun NavigationSetup(
     viewModel: ExpenzViewModel,
     navController: NavHostController,
-    startDestination: String
+    startDestination: String,
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Screen.Login.route) {
@@ -32,7 +32,10 @@ fun NavigationSetup(
             AddScreen(navController, viewModel)
         }
         composable(Screen.Details.route) {
-            DetailsScreen()
+            DetailsScreen(viewModel, navController)
+        }
+        composable(Screen.DataList.route) {
+            DataListScreen(viewModel, navController)
         }
     }
 }

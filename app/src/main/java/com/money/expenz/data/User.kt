@@ -20,5 +20,5 @@ data class User(
     @ColumnInfo(name = "TotalIncome")
     var totalIncome: Long = 0,
     @ColumnInfo(name = "TotalExpense")
-    var totalExpense: Long = 0
+    var totalExpense: Long = 0,
 )

@@ -9,7 +9,7 @@ import com.money.expenz.data.IEDetails
 import com.money.expenz.data.User
 import com.money.expenz.data.UserWithIEDetails
 import com.money.expenz.repository.UserRepository
-import com.money.expenz.utils.Constants
+import com.money.expenz.utils.ExpenzUtil
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,84 +25,117 @@ import kotlinx.coroutines.launch
  */
 
 class ExpenzViewModel(private val repository: UserRepository) : ViewModel() {
-
     sealed class ViewState {
         object Loading : ViewState() // hasLoggedIn = unknown
+
         object LoggedIn : ViewState() // hasLoggedIn = true
+
         object NotLoggedIn : ViewState() // hasLoggedIn = false
     }
 
     private val hasLoggedIn = MutableStateFlow(false)
 
-    val viewState = hasLoggedIn.map { hasLoggedIn ->
-        if (hasLoggedIn) {
-            ViewState.LoggedIn
-        } else {
-            ViewState.NotLoggedIn
+    val viewState =
+        hasLoggedIn.map { hasLoggedIn ->
+            if (hasLoggedIn) {
+                ViewState.LoggedIn
+            } else {
+                ViewState.NotLoggedIn
+            }
         }
-    }
 
     var loggedInUserId = MutableLiveData(0)
 
-    private var dbusers: MutableList<UserWithIEDetails> = mutableListOf()
+    private var dbusers: MutableList<User> = mutableListOf()
+    private var dbUsersWithIE: MutableList<UserWithIEDetails> = mutableListOf()
 
     var _loggedInUser = MutableLiveData<User>()
     val loggedInUser: LiveData<User> get() = _loggedInUser
 
-    var userName = ""
-    var password = ""
+    private var _ieDetails: MutableList<IEDetails> = mutableListOf()
+    var ieDetailsList: List<IEDetails> = listOf()
+
+    private var _selectedIEDetails = MutableLiveData<IEDetails>()
+    val selectedIEDetails: LiveData<IEDetails> get() = _selectedIEDetails
+
+    private var _userName = ""
+    private var _password = ""
 
     private var job: Job? = null
 
     init {
-        getUserWithIEDetails()
+        getDatabaseUsers()
     }
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        notifyError(throwable)
-    }
+    private val exceptionHandler =
+        CoroutineExceptionHandler { _, throwable ->
+            notifyError(throwable)
+        }
 
-    private fun getUserWithIEDetails() {
-        job = viewModelScope.launch {
-            repository.getUserWithIEDetails().flowOn(Dispatchers.IO).catch { exceptionHandler }
-                .collect { users ->
+    private fun getDatabaseUsers() {
+        viewModelScope.launch {
+            repository.getUsers()?.catch { exceptionHandler }
+                ?.collect { users ->
                     dbusers = users.toMutableList()
-                    dbusers.forEach { activeUsers ->
-                        if ((activeUsers.user.userName == userName) && (activeUsers.user.password == password)) {
+                    users.forEach { loggedInUser ->
+                        if (loggedInUser.userName == _userName && loggedInUser.password == _password) {
+                            loggedInUserId.value = loggedInUser.id
+                            _loggedInUser.value = loggedInUser
                             setLoggedIn(true)
-                            _loggedInUser.value = activeUsers.user
-                        }
+                        } else setLoggedIn(false)
                     }
                 }
         }
+    }
+
+    private fun getUserWithIEDetails() {
+        job =
+            viewModelScope.launch {
+                repository.getUserWithIEDetails().flowOn(Dispatchers.IO).catch { exceptionHandler }
+                    .collect { users ->
+                        dbUsersWithIE = users.toMutableList()
+                        users.forEach { activeUser ->
+                            if ((activeUser.user.id == loggedInUserId.value)) {
+                                setLoggedIn(true)
+                                _loggedInUser.value = activeUser.user
+                                _ieDetails = activeUser.ieDetails.toMutableList()
+                            } else
+                                setLoggedIn(false)
+                        }
+                    }
+            }
     }
 
     private fun notifyError(exception: Throwable) {
         Log.d("ExpenzViewModel", "Exception ${exception.localizedMessage}")
     }
 
-    fun checkUserInDB(userName: String, password: String): Boolean {
-        dbusers.forEach { activeUsers ->
-            activeUsers.user
-            if ((activeUsers.user.userName == userName) && (activeUsers.user.password == password)) {
+    fun checkUserInDB(
+        userName: String,
+        password: String,
+    ): Boolean {
+        getDatabaseUsers()
+        dbusers.forEach { activeUser ->
+            if ((activeUser.userName == userName) && (activeUser.password == password)) {
                 setLoggedIn(true)
-                getLoggedInUserDetails(activeUsers.user.id)
-                loggedInUserId.value = activeUsers.user.id
+                getLoggedInUserDetails(activeUser.id)
+                loggedInUserId.value = activeUser.id
                 return true
             }
         }
         return false
     }
 
-    fun getLoggedInUserDetails(loggedInUserId: Int) {
+    private fun getLoggedInUserDetails(loggedInUserId: Int) {
         viewModelScope.launch {
             _loggedInUser.value = repository.getLoggedInUserDetails(loggedInUserId)
         }
+        getUserWithIEDetails()
     }
 
     fun registerUser(registerUser: User) {
-        userName = registerUser.userName
-        password = registerUser.password
+        _userName = registerUser.userName
+        _password = registerUser.password
         viewModelScope.launch {
             repository.insertUserData(registerUser)
         }
@@ -111,20 +144,37 @@ class ExpenzViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun insertIEDetails(ieDetails: IEDetails) {
         viewModelScope.launch { repository.insertIEDetails(ieDetails) }
-        getUserWithIEDetails()
     }
 
-    fun updateUserDetails(amount: Int, ieValue: String) {
-        if (ieValue == Constants.income) {
+    fun updateUserDetails(
+        amount: Int,
+        ieValue: String,
+    ) {
+        if (ieValue == ExpenzUtil.INCOME) {
             _loggedInUser.value?.totalIncome = _loggedInUser.value?.totalIncome?.plus(amount)!!
-        } else if (ieValue == Constants.expense || ieValue == Constants.subscription) {
+        } else if (ieValue == ExpenzUtil.EXPENSE || ieValue == ExpenzUtil.SUBSCRIPTION) {
             _loggedInUser.value?.totalExpense = _loggedInUser.value?.totalExpense?.plus(amount)!!
         }
         viewModelScope.launch { _loggedInUser.value?.let { repository.updateUserDetails(it) } }
     }
 
-    fun setLoggedIn(boolean: Boolean) {
+    private fun setLoggedIn(boolean: Boolean) {
         hasLoggedIn.value = boolean
+    }
+
+    fun filterIEList(category: String) {
+        ieDetailsList = _ieDetails.filter { item -> item.ie == category }
+        // job = viewModelScope.launch { _ieDetails = repository.searchIECategory(category) }
+    }
+
+    fun getIEDetails(ieID: Int) {
+        dbUsersWithIE.forEach {
+            it.ieDetails.forEach { ie ->
+                if (ie.ieId == ieID) {
+                    _selectedIEDetails.value = ie
+                }
+            }
+        }
     }
 
     override fun onCleared() {

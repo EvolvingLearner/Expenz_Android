@@ -30,8 +30,10 @@ import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.ui.home.ExpenzViewModel
 
 @Composable
-fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
-
+fun LoginScreen(
+    viewModel: ExpenzViewModel,
+    navController: NavController,
+) {
     val username = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -39,24 +41,27 @@ fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
     Box(modifier = Modifier.fillMaxSize()) {
         ClickableText(
             text = AnnotatedString("Register here"),
-            modifier = Modifier
+            modifier =
+            Modifier
                 .align(Alignment.BottomCenter)
                 .padding(20.dp),
             onClick = { navController.navigate(Screen.Register.route) },
-            style = TextStyle(
+            style =
+            TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily.Default,
                 textDecoration = TextDecoration.Underline,
-                color = ExpenzTheme.colorScheme.onSurface
-            )
+                color = ExpenzTheme.colorScheme.onSurface,
+            ),
         )
     }
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .padding(start = 30.dp, end = 30.dp)
             .fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val showPassword by remember { mutableStateOf(false) }
 
@@ -64,7 +69,7 @@ fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
         Text(
             text = "Login",
             fontSize = 30.sp,
-            color = ExpenzTheme.colorScheme.onSurface
+            color = ExpenzTheme.colorScheme.onSurface,
         )
         Spacer(modifier = Modifier.height(50.dp))
         TextField(
@@ -76,9 +81,9 @@ fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
             trailingIcon = {
                 Icon(
                     imageVector = (Icons.Filled.AccountBox),
-                    contentDescription = ""
+                    contentDescription = "",
                 )
-            }
+            },
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -86,7 +91,8 @@ fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
             modifier = Modifier.fillMaxWidth(),
             label = { Text(text = "Password") },
             value = password.value,
-            visualTransformation = if (showPassword) {
+            visualTransformation =
+            if (showPassword) {
                 VisualTransformation.None
             } else {
                 PasswordVisualTransformation()
@@ -96,23 +102,25 @@ fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
             onValueChange = { password.value = it },
             trailingIcon = {
                 Icon(imageVector = Icons.Filled.Lock, contentDescription = "")
-            }
+            },
         )
 
         Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.padding(start = 40.dp, end = 40.dp)) {
             Button(
                 onClick = {
-                    if (username.value.isEmpty() || password.value.isEmpty())
-                        Toast.makeText(context, "Enter valid data", Toast.LENGTH_SHORT).show() else if (!viewModel.checkUserInDB(username.value, password.value)) {
+                    if (username.value.isEmpty() || password.value.isEmpty()) {
+                        Toast.makeText(context, "Enter valid data", Toast.LENGTH_SHORT).show()
+                    } else if (!viewModel.checkUserInDB(username.value, password.value)) {
                         Toast.makeText(context, "Invalid user", Toast.LENGTH_SHORT).show()
                     }
                 },
                 shape = RoundedCornerShape(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = ExpenzTheme.colorScheme.primaryContainer),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .height(50.dp),
             ) {
                 Text(text = "Login", color = ExpenzTheme.colorScheme.onPrimaryContainer)
             }
@@ -122,11 +130,12 @@ fun LoginScreen(viewModel: ExpenzViewModel, navController: NavController) {
         ClickableText(
             text = AnnotatedString("Forgot password?"),
             onClick = { },
-            style = TextStyle(
+            style =
+            TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily.Default,
-                color = ExpenzTheme.colorScheme.onBackground
-            )
+                color = ExpenzTheme.colorScheme.onBackground,
+            ),
         )
     }
 }

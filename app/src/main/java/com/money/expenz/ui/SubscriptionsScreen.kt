@@ -32,24 +32,30 @@ fun SubscriptionsScreen(navController: NavController) {
 }
 
 @Composable
-fun SubscriptionList(subscriptions: List<Subscription>, navController: NavController) {
+fun SubscriptionList(
+    subscriptions: List<Subscription>,
+    navController: NavController,
+) {
     LazyColumn(modifier = Modifier.background(ExpenzTheme.colorScheme.onPrimary)) {
         items(subscriptions) { subscription -> SubscriptionCard(subscription, navController) }
     }
 }
 
 @Composable
-fun SubscriptionCard(subscription: Subscription, navController: NavController) {
+fun SubscriptionCard(
+    subscription: Subscription,
+    navController: NavController,
+) {
     Row(
         modifier = Modifier.clickable { navController.navigate(Screen.Details.route) },
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.Start,
     ) {
         Image(
             painter = painterResource(subscription.imageResourceId),
             contentDescription = null,
             modifier = Modifier.padding(5.dp),
-            contentScale = ContentScale.Inside
+            contentScale = ContentScale.Inside,
         )
         Text(
             text = stringResource(subscription.stringResourceId),
@@ -57,7 +63,7 @@ fun SubscriptionCard(subscription: Subscription, navController: NavController) {
             style = Typography.bodySmall,
             fontSize = 25.sp,
             overflow = TextOverflow.Ellipsis,
-            lineHeight = 1.5.em
+            lineHeight = 1.5.em,
         )
     }
     Divider()
