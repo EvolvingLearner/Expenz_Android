@@ -3,15 +3,37 @@ package com.money.expenz.ui
 import android.app.DatePickerDialog
 import android.widget.DatePicker
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,8 +53,10 @@ import com.money.expenz.ui.home.ExpenzViewModel
 import com.money.expenz.utils.ExpenzUtil.Companion.EXPENSE
 import com.money.expenz.utils.ExpenzUtil.Companion.INCOME
 import com.money.expenz.utils.ExpenzUtil.Companion.SUBSCRIPTION
-import java.util.*
+import java.util.Calendar
+import java.util.Date
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScreen(
     navController: NavController,
@@ -126,7 +150,7 @@ fun AddScreen(
         }
 
         // Set Category
-        var isExpanded by remember {
+        var expanded by remember {
             mutableStateOf(false)
         }
         val categories =
@@ -140,10 +164,9 @@ fun AddScreen(
                 "Internet",
                 "Medical",
                 "Pets",
+                "Salary",
                 "Others",
             )
-
-        val icon = if (isExpanded) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp
         Column(
             modifier =
             Modifier
@@ -151,29 +174,42 @@ fun AddScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
         ) {
-            OutlinedTextField(
-                value = category.value,
-                onValueChange = { category.value = it },
-                trailingIcon = { Icon(icon, "", Modifier.clickable { isExpanded = !isExpanded }) },
-                modifier =
-                Modifier
-                    .fillMaxWidth(),
-                label = { Text(text = stringResource(id = R.string.category)) },
-            )
-
-            DropdownMenu(
-                modifier = Modifier.padding(5.dp),
-                expanded = isExpanded,
-                onDismissRequest = { isExpanded = false },
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = {
+                    expanded = !expanded
+                }
             ) {
-                categories.forEach { categorySelected ->
-                    DropdownMenuItem(
-                        text = { Text(text = categorySelected) },
-                        onClick = {
-                            category.value = categorySelected
-                            isExpanded = false
-                        },
-                    )
+                TextField(
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth(),
+                    readOnly = true,
+                    value = category.value,
+                    onValueChange = { category.value = it },
+                    label = { Text(text = stringResource(id = R.string.category)) },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(
+                            expanded = expanded
+                        )
+                    },
+                    colors = ExposedDropdownMenuDefaults.textFieldColors()
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = {
+                        expanded = false
+                    }
+                ) {
+                    categories.forEach { categorySelected ->
+                        DropdownMenuItem(
+                            text = { Text(text = categorySelected) },
+                            onClick = {
+                                category.value = categorySelected
+                                expanded = false
+                            },
+                        )
+                    }
                 }
             }
         }
