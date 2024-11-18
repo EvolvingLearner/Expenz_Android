@@ -23,7 +23,6 @@ open class BaseActivity : ComponentActivity() {
 
         setContent {
             ExpenzTheme {
-
                 val owner = LocalViewModelStoreOwner.current
 
                 owner?.let {

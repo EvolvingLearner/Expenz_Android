@@ -11,8 +11,10 @@ import kotlinx.coroutines.flow.Flow
  * Coroutine used to avoid database operations on main thread
  */
 class UserRepository(private val userDAO: UserDAO) {
-
-    val allUsersList: Flow<List<User>> = userDAO.getAllUsers()
+    @WorkerThread
+    fun getUsers(): Flow<List<User>>? {
+        return userDAO.getAllUsers()
+    }
 
     @WorkerThread
     fun getUserWithIEDetails(): Flow<List<UserWithIEDetails>> {
@@ -36,5 +38,10 @@ class UserRepository(private val userDAO: UserDAO) {
 
     suspend fun updateUserDetails(user: User) {
         userDAO.updateUserDetails(user)
+    }
+
+    @WorkerThread
+    suspend fun searchIECategory(category: String): List<IEDetails> {
+        return userDAO.searchIECategory(category)
     }
 }

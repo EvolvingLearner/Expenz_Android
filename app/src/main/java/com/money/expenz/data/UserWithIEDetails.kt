@@ -7,7 +7,7 @@ data class UserWithIEDetails(
     @Embedded val user: User,
     @Relation(
         parentColumn = "Id",
-        entityColumn = "userId"
+        entityColumn = "userId",
     )
-    val ieDetails: List<IEDetails>
+    val ieDetails: List<IEDetails>,
 )

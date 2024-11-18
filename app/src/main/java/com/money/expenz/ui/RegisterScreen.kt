@@ -32,44 +32,51 @@ fun RegisterScreen(viewModel: ExpenzViewModel) {
     val password = remember { mutableStateOf("") }
     val context = LocalContext.current
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
-            .padding(20.dp)
+            .padding(20.dp),
     ) {
         Button(
             onClick = {
-                if (username.value.isEmpty()) Toast.makeText(context, "Enter Username", Toast.LENGTH_SHORT).show()
-                else if (password.value.isEmpty()) Toast.makeText(context, "Enter password", Toast.LENGTH_SHORT).show()
-                else if (email.value.isEmpty()) Toast.makeText(context, "Enter Email", Toast.LENGTH_SHORT).show()
-                else if (country.value.isEmpty()) {
+                if (username.value.isEmpty()) {
+                    Toast.makeText(context, "Enter Username", Toast.LENGTH_SHORT).show()
+                } else if (password.value.isEmpty()) {
+                    Toast.makeText(context, "Enter password", Toast.LENGTH_SHORT).show()
+                } else if (email.value.isEmpty()) {
+                    Toast.makeText(context, "Enter Email", Toast.LENGTH_SHORT).show()
+                } else if (country.value.isEmpty()) {
                     Toast.makeText(context, "Select Country", Toast.LENGTH_SHORT).show()
                 } else {
-                    val newUser = User(
-                        userName = username.value,
-                        password = password.value,
-                        email = email.value,
-                        country = country.value
-                    )
+                    val newUser =
+                        User(
+                            userName = username.value,
+                            password = password.value,
+                            email = email.value,
+                            country = country.value,
+                        )
                     viewModel.registerUser(newUser)
                 }
             },
             shape = RoundedCornerShape(50.dp),
             colors = ButtonDefaults.buttonColors(containerColor = ExpenzAppBar.ExpenzTheme.colorScheme.primaryContainer),
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .height(50.dp)
-                .align(Alignment.BottomCenter)
+                .align(Alignment.BottomCenter),
         ) {
             Text(text = "Register", color = ExpenzAppBar.ExpenzTheme.colorScheme.onPrimaryContainer)
         }
     }
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .padding(start = 20.dp, end = 20.dp)
             .fillMaxWidth()
             .background(ExpenzAppBar.ExpenzTheme.colorScheme.background),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val showPassword by remember { mutableStateOf(false) }
 
@@ -77,7 +84,7 @@ fun RegisterScreen(viewModel: ExpenzViewModel) {
         Text(
             text = "Register",
             fontSize = 30.sp,
-            color = ExpenzAppBar.ExpenzTheme.colorScheme.onSurface
+            color = ExpenzAppBar.ExpenzTheme.colorScheme.onSurface,
         )
         Spacer(modifier = Modifier.height(50.dp))
         TextField(
@@ -93,7 +100,7 @@ fun RegisterScreen(viewModel: ExpenzViewModel) {
                     contentDescription = "",
                     modifier = Modifier.clickable { username.value = "" },
                 )
-            }
+            },
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -101,7 +108,8 @@ fun RegisterScreen(viewModel: ExpenzViewModel) {
             modifier = Modifier.fillMaxWidth(),
             label = { Text(text = "Password") },
             value = password.value,
-            visualTransformation = if (showPassword) {
+            visualTransformation =
+            if (showPassword) {
                 VisualTransformation.None
             } else {
                 PasswordVisualTransformation()
@@ -114,9 +122,9 @@ fun RegisterScreen(viewModel: ExpenzViewModel) {
                 Icon(
                     modifier = Modifier.clickable { password.value = "" },
                     imageVector = Icons.Filled.Clear,
-                    contentDescription = ""
+                    contentDescription = "",
                 )
-            }
+            },
         )
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
@@ -131,9 +139,9 @@ fun RegisterScreen(viewModel: ExpenzViewModel) {
                 Icon(
                     modifier = Modifier.clickable { email.value = "" },
                     imageVector = (Icons.Filled.Clear),
-                    contentDescription = "clear"
+                    contentDescription = "clear",
                 )
-            }
+            },
         )
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
@@ -142,7 +150,7 @@ fun RegisterScreen(viewModel: ExpenzViewModel) {
             value = country.value,
             onValueChange = { country.value = it },
             singleLine = true,
-            leadingIcon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") }
+            leadingIcon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") },
         )
     }
 }

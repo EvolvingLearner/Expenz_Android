@@ -12,6 +12,7 @@
     <string name="details">Details</string>
     <string name="menu_add">Add</string>
     <string name="menu_subscriptions">Subscriptions</string>
+    <string name="data_list">Income/Expense</string>
 
     // Subscriptions
     <string name="subscriptions">My Subscriptions</string>

@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserDAO {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(user: User)
 
@@ -22,7 +21,7 @@ interface UserDAO {
     suspend fun insertIEDetails(ieDetails: IEDetails)
 
     @Query("SELECT * FROM User")
-    fun getAllUsers(): Flow<List<User>>
+    fun getAllUsers(): Flow<List<User>>?
 
     @Query("SELECT * FROM User WHERE id LIKE :userId")
     suspend fun getLoggedInUserDetails(userId: Int): User
@@ -30,6 +29,9 @@ interface UserDAO {
     @Transaction
     @Query("SELECT * FROM User")
     fun getUserWithIEDetails(): Flow<List<UserWithIEDetails>>
+
+    @Query("SELECT * FROM IEDetails WHERE category LIKE :category")
+    suspend fun searchIECategory(category: String): List<IEDetails>
 
     @Update
     suspend fun updateUserDetails(user: User)
