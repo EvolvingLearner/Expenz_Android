@@ -42,24 +42,24 @@ fun LoginScreen(
         ClickableText(
             text = AnnotatedString("Register here"),
             modifier =
-            Modifier
-                .align(Alignment.BottomCenter)
-                .padding(20.dp),
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(20.dp),
             onClick = { navController.navigate(Screen.Register.route) },
             style =
-            TextStyle(
-                fontSize = 14.sp,
-                fontFamily = FontFamily.Default,
-                textDecoration = TextDecoration.Underline,
-                color = ExpenzTheme.colorScheme.onSurface,
-            ),
+                TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.Default,
+                    textDecoration = TextDecoration.Underline,
+                    color = ExpenzTheme.colorScheme.onSurface,
+                ),
         )
     }
     Column(
         modifier =
-        Modifier
-            .padding(start = 30.dp, end = 30.dp)
-            .fillMaxWidth(),
+            Modifier
+                .padding(start = 30.dp, end = 30.dp)
+                .fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -92,11 +92,11 @@ fun LoginScreen(
             label = { Text(text = "Password") },
             value = password.value,
             visualTransformation =
-            if (showPassword) {
-                VisualTransformation.None
-            } else {
-                PasswordVisualTransformation()
-            },
+                if (showPassword) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             onValueChange = { password.value = it },
@@ -118,9 +118,9 @@ fun LoginScreen(
                 shape = RoundedCornerShape(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = ExpenzTheme.colorScheme.primaryContainer),
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
             ) {
                 Text(text = "Login", color = ExpenzTheme.colorScheme.onPrimaryContainer)
             }
@@ -131,11 +131,11 @@ fun LoginScreen(
             text = AnnotatedString("Forgot password?"),
             onClick = { },
             style =
-            TextStyle(
-                fontSize = 14.sp,
-                fontFamily = FontFamily.Default,
-                color = ExpenzTheme.colorScheme.onBackground,
-            ),
+                TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.Default,
+                    color = ExpenzTheme.colorScheme.onBackground,
+                ),
         )
     }
 }

@@ -17,9 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -50,11 +47,13 @@ import com.money.expenz.R
 import com.money.expenz.data.IEDetails
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.ui.home.ExpenzViewModel
+import com.money.expenz.ui.home.ExpenzViewModel.LoadingState
 import com.money.expenz.utils.ExpenzUtil.Companion.EXPENSE
 import com.money.expenz.utils.ExpenzUtil.Companion.INCOME
 import com.money.expenz.utils.ExpenzUtil.Companion.SUBSCRIPTION
 import java.util.Calendar
 import java.util.Date
+import com.money.expenz.utils.Category_List
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,11 +61,13 @@ fun AddScreen(
     navController: NavController,
     viewModel: ExpenzViewModel,
 ) {
-    val radioValue = remember { mutableStateOf("") }
-    val category = remember { mutableStateOf("") }
-    val amount = remember { mutableStateOf("") }
-    val date = remember { mutableStateOf("") }
-    val notes = remember { mutableStateOf("") }
+    val iedetailsToEdit = viewModel.iedetailsToEdit
+    val loadingState by viewModel.loadingState
+    val radioValue = remember { mutableStateOf(iedetailsToEdit?.ie ?: "") }
+    val category = remember { mutableStateOf(iedetailsToEdit?.category ?: "") }
+    val amount = remember { mutableStateOf(iedetailsToEdit?.amount?.toString() ?: "") }
+    val date = remember { mutableStateOf(iedetailsToEdit?.date ?: "") }
+    val notes = remember { mutableStateOf(iedetailsToEdit?.notes ?: "") }
     Box(
         modifier =
         Modifier
@@ -79,31 +80,39 @@ fun AddScreen(
                 .fillMaxWidth()
                 .align(alignment = Alignment.BottomCenter),
             onClick = {
-                val ieDetails =
-                    viewModel.loggedInUserId.value?.let {
-                        IEDetails(
-                            ie = radioValue.value,
-                            category = category.value,
-                            amount = amount.value.toIntOrNull() ?: 0,
-                            date = date.value,
-                            notes = notes.value,
-                            userId = it,
-                        )
+                val ieDetails = IEDetails(
+                    ie = radioValue.value,
+                    category = category.value,
+                    amount = amount.value.toIntOrNull() ?: 0,
+                    date = date.value,
+                    notes = notes.value,
+                    userId = viewModel.loggedInUserId ?: 0,
+                )
+                if (iedetailsToEdit != null) {
+                    ieDetails.ieId = iedetailsToEdit.ieId
+                    viewModel.updateIEDetails(ieDetails)
+                } else {
+                    viewModel.insertIEDetails(ieDetails)
+                    viewModel.updateUserIEAmount(amount.value.toInt(), radioValue.value, false)
+                }
+                if (loadingState == LoadingState.Success) {
+                    navController.navigate(BottomNavItem.Home.route) {
+                        viewModel.iedetailsToEdit = null
+                        popUpTo(BottomNavItem.Home.route) { inclusive = true }
                     }
-                viewModel.insertIEDetails(ieDetails!!)
-                viewModel.updateUserDetails(amount.value.toInt(), radioValue.value)
-                navController.navigate(BottomNavItem.Home.route) {
-                    popUpTo(BottomNavItem.Home.route) { inclusive = true }
                 }
             },
             colors = ButtonDefaults.buttonColors(containerColor = ExpenzTheme.colorScheme.primaryContainer),
             shape = CutCornerShape(10),
         ) {
             Text(
-                text = stringResource(id = R.string.add),
+                text = stringResource(id = if (iedetailsToEdit != null) R.string.update else R.string.add),
                 color = ExpenzTheme.colorScheme.onSurfaceVariant,
                 style = ExpenzTheme.typography.labelLarge,
             )
+        }
+        if (loadingState == LoadingState.Loading) {
+            LoadingProgressBar(loadingState = loadingState)
         }
     }
     Column(
@@ -117,7 +126,7 @@ fun AddScreen(
         val radioOptions = listOf(INCOME, EXPENSE, SUBSCRIPTION)
         val (selectedOption, onOptionSelected) =
             remember {
-                mutableStateOf(radioOptions[2])
+                mutableStateOf(radioValue.value.takeIf { it in radioOptions } ?: radioOptions[2])
             }
         Column(
             modifier =
@@ -153,20 +162,7 @@ fun AddScreen(
         var expanded by remember {
             mutableStateOf(false)
         }
-        val categories =
-            listOf(
-                "Media",
-                "Electricity",
-                "Travel",
-                "Food",
-                "Shopping",
-                "Gas",
-                "Internet",
-                "Medical",
-                "Pets",
-                "Salary",
-                "Others",
-            )
+        val categories = Category_List
         Column(
             modifier =
             Modifier
@@ -178,10 +174,11 @@ fun AddScreen(
                 expanded = expanded,
                 onExpandedChange = {
                     expanded = !expanded
-                }
+                },
             ) {
                 TextField(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .menuAnchor()
                         .fillMaxWidth(),
                     readOnly = true,
@@ -190,16 +187,16 @@ fun AddScreen(
                     label = { Text(text = stringResource(id = R.string.category)) },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(
-                            expanded = expanded
+                            expanded = expanded,
                         )
                     },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors()
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
                 )
                 ExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = {
                         expanded = false
-                    }
+                    },
                 ) {
                     categories.forEach { categorySelected ->
                         DropdownMenuItem(
@@ -259,7 +256,7 @@ fun AddScreen(
         mCalendar.time = Date()
 
         // Declaring a string value to store date in string format
-        val mDate = remember { mutableStateOf("") }
+        val mDate = remember { mutableStateOf(iedetailsToEdit?.date ?: "") }
 
         // Declaring DatePickerDialog and setting
         // initial values as current values (present year, month and day)

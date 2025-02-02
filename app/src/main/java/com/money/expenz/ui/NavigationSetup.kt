@@ -26,7 +26,8 @@ fun NavigationSetup(
             })
         }
         composable(BottomNavItem.Subscriptions.route) {
-            SubscriptionsScreen(navController)
+            viewModel.getSubscriptionList()
+            SubscriptionsScreen(viewModel, navController)
         }
         composable(BottomNavItem.Add.route) {
             AddScreen(navController, viewModel)
@@ -34,7 +35,10 @@ fun NavigationSetup(
         composable(Screen.Details.route) {
             DetailsScreen(viewModel, navController)
         }
-        composable(Screen.DataList.route) {
+        composable(Screen.IncomeList.route) {
+            DataListScreen(viewModel, navController)
+        }
+        composable(Screen.ExpenseList.route) {
             DataListScreen(viewModel, navController)
         }
     }

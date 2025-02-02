@@ -25,6 +25,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.money.expenz.ui.BottomNavItem
+import com.money.expenz.ui.ExpenzAlertDialog
 import com.money.expenz.ui.NavigationSetup
 import com.money.expenz.ui.Screen
 import com.money.expenz.ui.home.ExpenzViewModel
@@ -54,11 +55,12 @@ class ExpenzAppBar {
                 TopAppBar(
                     currentScreen = Screen.valueOf(currentRoute ?: Screen.Home.route),
                     canNavigateBack =
-                    navController.previousBackStackEntry != null &&
-                        !currentRoute.equals(
-                            Screen.Home.route,
-                        ),
+                        navController.previousBackStackEntry != null &&
+                            !currentRoute.equals(
+                                Screen.Home.route,
+                            ),
                     navigateUp = { navController.navigateUp() },
+                    viewModel = viewModel
                 )
             },
             bottomBar = {
@@ -77,8 +79,10 @@ class ExpenzAppBar {
         canNavigateBack: Boolean,
         navigateUp: () -> Unit,
         modifier: Modifier = Modifier,
+        viewModel: ExpenzViewModel,
     ) {
         val localContext = LocalContext.current as Activity
+        ExpenzAlertDialog(viewModel = viewModel)
         TopAppBar(
             title = { Text(stringResource(currentScreen.title)) },
             backgroundColor = ExpenzTheme.colorScheme.primary,
@@ -88,7 +92,16 @@ class ExpenzAppBar {
                     imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
                     description = "Logout",
                     onClick = {
-                        localContext.finishAffinity()
+                        viewModel.showDialog(
+                            title = "Confirmation",
+                            message = "Are you sure you want to Logout?",
+                            onYes = {
+                                localContext.finishAffinity()
+                            },
+                            onNo = {
+                                viewModel.hideDialog()
+                            }
+                        )
                     },
                 )
             },
@@ -149,22 +162,7 @@ class ExpenzAppBar {
                     },
                     label = { Text(text = stringResource(id = item.titleResId)) },
                     selected = currentRoute == item.route,
-                    onClick = {
-                        navController.navigate(item.route) {
-                            // Pop up to the start destination of the graph to
-                            // avoid building up a large stack of destinations
-                            // on the back stack as users select items
-                            navController.graph.startDestinationRoute?.let { route ->
-                                popUpTo(route) {
-                                    saveState = true
-                                }
-                            }
-                            // Avoid multiple copies of the same destination when re-selecting the same item
-                            launchSingleTop = true
-                            // Restore state when re-selecting a previously selected item
-                            restoreState = true
-                        }
-                    },
+                    onClick = { navigateTo(navController, item.route)},
                 )
             }
         }
@@ -179,12 +177,12 @@ class ExpenzAppBar {
         Column(
             Modifier.padding(
                 paddingValues =
-                PaddingValues(
-                    10.dp,
-                    innerPaddingValues.calculateTopPadding(),
-                    10.dp,
-                    innerPaddingValues.calculateBottomPadding(),
-                ),
+                    PaddingValues(
+                        10.dp,
+                        innerPaddingValues.calculateTopPadding(),
+                        10.dp,
+                        innerPaddingValues.calculateBottomPadding(),
+                    ),
             ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -192,5 +190,14 @@ class ExpenzAppBar {
             NavigationSetup(viewModel, navController = navController, Screen.Home.route)
             // HomeScreen(viewModel, navController)
         }
+    }
+}
+
+fun navigateTo(navController: NavController, route: String) {
+    navController.navigate(route) {
+        popUpTo(route) {
+            saveState = true
+        }
+        launchSingleTop = true
     }
 }

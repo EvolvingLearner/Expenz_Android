@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.money.expenz.data.IEDetails
+import com.money.expenz.data.Subscription
 import com.money.expenz.data.User
 import com.money.expenz.data.UserWithIEDetails
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +20,9 @@ interface UserDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertIEDetails(ieDetails: IEDetails)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSubscription(subscription: Subscription)
 
     @Query("SELECT * FROM User")
     fun getAllUsers(): Flow<List<User>>?
@@ -33,9 +37,15 @@ interface UserDAO {
     @Query("SELECT * FROM IEDetails WHERE category LIKE :category")
     suspend fun searchIECategory(category: String): List<IEDetails>
 
+    @Query("SELECT * FROM Subscription")
+    fun getAllSubscriptions(): Flow<List<Subscription>>
+
     @Update
     suspend fun updateUserDetails(user: User)
 
+    @Update
+    suspend fun updateIEDetails(ieDetails: IEDetails)
+
     @Delete
-    suspend fun deleteUserIEDetails(employee: IEDetails)
+    suspend fun deleteUserIEDetails(ieDetails: IEDetails)
 }

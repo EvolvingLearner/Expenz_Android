@@ -18,23 +18,21 @@ import com.money.expenz.ui.home.ExpenzViewModel
 import com.money.expenz.ui.theme.ExpenzTheme
 
 open class BaseActivity : ComponentActivity() {
+    val viewModel: ExpenzViewModel by viewModels { ViewModelFactory((application as ExpenzApplication).repository) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             ExpenzTheme {
-                val owner = LocalViewModelStoreOwner.current
-
-                owner?.let {
-                    val viewModel: ExpenzViewModel by viewModels { ViewModelFactory((application as ExpenzApplication).repository) }
-                    val navController: NavHostController = rememberNavController()
-                    NavigationSetup(viewModel, navController = navController, Screen.Home.route)
-
-                    val viewState by viewModel.viewState.collectAsState(initial = false)
-                    when (viewState) {
-                        ExpenzViewModel.ViewState.LoggedIn -> {
-                            navController.navigate(Screen.Home.route)
-                            ExpenzAppBar().AppBar(viewModel, navController)
+                val navController: NavHostController = rememberNavController()
+                NavigationSetup(viewModel, navController = navController, Screen.Home.route)
+                ExpenzAppBar().AppBar(viewModel, navController)
+                val viewState by viewModel.viewState.collectAsState(initial = false)
+                LaunchedEffect(viewState) {
+                    if (viewState == ExpenzViewModel.ViewState.LoggedIn) {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(0) // Clears entire backstack
+                            launchSingleTop = true // Avoid duplicate navigation
                         }
                     }
                 }

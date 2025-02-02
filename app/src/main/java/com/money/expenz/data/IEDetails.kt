@@ -21,7 +21,7 @@ data class IEDetails(
     @ColumnInfo(name = "Notes")
     var notes: String = "",
     @ColumnInfo(name = "userId")
-    var userId: Int = 0
+    var userId: Int = 0,
 )
 
 data class IEDetailsDTO(
@@ -29,7 +29,7 @@ data class IEDetailsDTO(
     val category: String = "",
     val amount: Int = 0,
     val date: String = "",
-    val notes: String = ""
+    val notes: String = "",
 )
 
 fun IEDetails.toIEDetailsDTO(): IEDetailsDTO {

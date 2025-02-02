@@ -33,9 +33,9 @@ fun RegisterScreen(viewModel: ExpenzViewModel) {
     val context = LocalContext.current
     Box(
         modifier =
-        Modifier
-            .fillMaxSize()
-            .padding(20.dp),
+            Modifier
+                .fillMaxSize()
+                .padding(20.dp),
     ) {
         Button(
             onClick = {
@@ -61,20 +61,20 @@ fun RegisterScreen(viewModel: ExpenzViewModel) {
             shape = RoundedCornerShape(50.dp),
             colors = ButtonDefaults.buttonColors(containerColor = ExpenzAppBar.ExpenzTheme.colorScheme.primaryContainer),
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .align(Alignment.BottomCenter),
+                Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .align(Alignment.BottomCenter),
         ) {
             Text(text = "Register", color = ExpenzAppBar.ExpenzTheme.colorScheme.onPrimaryContainer)
         }
     }
     Column(
         modifier =
-        Modifier
-            .padding(start = 20.dp, end = 20.dp)
-            .fillMaxWidth()
-            .background(ExpenzAppBar.ExpenzTheme.colorScheme.background),
+            Modifier
+                .padding(start = 20.dp, end = 20.dp)
+                .fillMaxWidth()
+                .background(ExpenzAppBar.ExpenzTheme.colorScheme.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -109,11 +109,11 @@ fun RegisterScreen(viewModel: ExpenzViewModel) {
             label = { Text(text = "Password") },
             value = password.value,
             visualTransformation =
-            if (showPassword) {
-                VisualTransformation.None
-            } else {
-                PasswordVisualTransformation()
-            },
+                if (showPassword) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             onValueChange = { password.value = it },

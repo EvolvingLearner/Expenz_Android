@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,6 +25,7 @@ import androidx.navigation.NavController
 import com.money.expenz.R
 import com.money.expenz.data.User
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
+import com.money.expenz.ui.LoadingProgressBar
 import com.money.expenz.ui.Screen
 import com.money.expenz.utils.ExpenzUtil.Companion.EXPENSE
 import com.money.expenz.utils.ExpenzUtil.Companion.INCOME
@@ -37,35 +37,37 @@ fun HomeScreen(
     navController: NavController,
     onNavigateToLoginScreen: () -> Unit = {},
 ) {
+    val loadingState by viewModel.loadingState
     val viewState by viewModel.viewState.collectAsState(initial = false)
-    when (viewState) {
-        ExpenzViewModel.ViewState.NotLoggedIn -> {
-            LaunchedEffect(viewState) {
-                onNavigateToLoginScreen()
-            }
-        }
+    val user by viewModel.loggedInUser.collectAsState()
 
-        ExpenzViewModel.ViewState.LoggedIn -> {
-            val user = viewModel.loggedInUser.observeAsState().value
-            Column(
-                Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(top = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                if (user != null) {
-                    PieChart(
-                        data = mapOf(
-                            Pair(INCOME, user.totalIncome.toInt()),
-                            Pair(EXPENSE, user.totalExpense.toInt()),
-                            Pair(SUBSCRIPTION, 80)
-                        )
-                    )
-                    TotalIncomeExpenseCard(navController, user, viewModel)
-                }
-            }
+    LaunchedEffect(viewState) {
+        if (viewState == ExpenzViewModel.ViewState.NotLoggedIn) {
+            onNavigateToLoginScreen()
         }
+    }
+    //if (viewState == ExpenzViewModel.ViewState.LoggedIn) {
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(top = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            if (loadingState == ExpenzViewModel.LoadingState.Loading) {
+                LoadingProgressBar(loadingState = loadingState)
+            } else if (loadingState == ExpenzViewModel.LoadingState.Success && user !=null) {
+                PieChart(
+                    data =
+                    mapOf(
+                        Pair(INCOME, user!!.totalIncome.toInt()),
+                        Pair(EXPENSE, user!!.totalExpense.toInt()),
+                        Pair(SUBSCRIPTION, user!!.totalSubscription.toInt()),
+                    ),
+                )
+                TotalIncomeExpenseCard(navController, user!!, viewModel)
+            }
+      //  }
     }
 }
 
@@ -87,8 +89,8 @@ fun TotalIncomeExpenseCard(
                 .height(150.dp)
                 .align(Alignment.CenterStart)
                 .clickable {
-                    navController.navigate(Screen.DataList.route)
-                    viewModel.filterIEList("Income")
+                    viewModel.filterIEList(INCOME)
+                    navController.navigate(Screen.IncomeList.route)
                 },
             elevation = 10.dp,
             backgroundColor = ExpenzTheme.colorScheme.primaryContainer,
@@ -121,8 +123,8 @@ fun TotalIncomeExpenseCard(
                 .height(150.dp)
                 .align(Alignment.CenterEnd)
                 .clickable {
-                    navController.navigate(Screen.DataList.route)
-                    viewModel.filterIEList("Expense")
+                    viewModel.filterIEList(EXPENSE)
+                    navController.navigate(Screen.ExpenseList.route)
                 },
             elevation = 10.dp,
             backgroundColor = ExpenzTheme.colorScheme.primaryContainer,

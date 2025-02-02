@@ -46,7 +46,7 @@ fun DataListScreen(
 fun EmptyMessage() {
     Column(
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = "No List to show",
@@ -77,21 +77,20 @@ fun DataCard(
     navController: NavController,
 ) {
     OutlinedCard(
-        modifier = Modifier
-            .clickable {
-                viewModel.getIEDetails(user.ieId)
-                navController.navigate(Screen.Details.route)
-            }
-            .fillMaxWidth()
-            .padding(top = 5.dp)
+        modifier =
+            Modifier
+                .clickable {
+                    viewModel.getIEDetails(user.ieId)
+                    navController.navigate(Screen.Details.route)
+                }.fillMaxWidth()
+                .padding(top = 5.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
-
         ) {
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 Text(
                     text = user.category,
@@ -100,7 +99,7 @@ fun DataCard(
                     fontSize = 20.sp,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 1.5.em,
-                    textAlign = TextAlign.Start
+                    textAlign = TextAlign.Start,
                 )
                 Text(
                     text = user.date,
@@ -119,7 +118,7 @@ fun DataCard(
                 fontSize = 20.sp,
                 overflow = TextOverflow.Ellipsis,
                 lineHeight = 1.5.em,
-                textAlign = TextAlign.End
+                textAlign = TextAlign.End,
             )
         }
     }

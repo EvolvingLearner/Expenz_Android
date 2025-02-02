@@ -5,11 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.money.expenz.data.IEDetails
+import com.money.expenz.data.Subscription
 import com.money.expenz.data.User
 import com.money.expenz.model.UserDAO
 import kotlinx.coroutines.CoroutineScope
 
-@Database(entities = [User::class, IEDetails::class], version = 1, exportSchema = true)
+@Database(entities = [User::class, IEDetails::class, Subscription::class], version = 1, exportSchema = true)
 abstract class UserDatabase : RoomDatabase() {
     abstract fun userDAO(): UserDAO
 
