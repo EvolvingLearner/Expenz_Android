@@ -9,13 +9,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -27,6 +28,7 @@ import com.money.expenz.data.User
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.ui.LoadingProgressBar
 import com.money.expenz.ui.Screen
+import com.money.expenz.ui.home.ExpenzViewModel.LoadingState
 import com.money.expenz.utils.ExpenzUtil.Companion.EXPENSE
 import com.money.expenz.utils.ExpenzUtil.Companion.INCOME
 import com.money.expenz.utils.ExpenzUtil.Companion.SUBSCRIPTION
@@ -34,19 +36,13 @@ import com.money.expenz.utils.ExpenzUtil.Companion.SUBSCRIPTION
 @Composable
 fun HomeScreen(
     viewModel: ExpenzViewModel,
-    navController: NavController,
-    onNavigateToLoginScreen: () -> Unit = {},
+    navController: NavController
 ) {
-    val loadingState by viewModel.loadingState
-    val viewState by viewModel.viewState.collectAsState(initial = false)
-    val user by viewModel.loggedInUser.collectAsState()
-
-    LaunchedEffect(viewState) {
-        if (viewState == ExpenzViewModel.ViewState.NotLoggedIn) {
-            onNavigateToLoginScreen()
-        }
-    }
-    //if (viewState == ExpenzViewModel.ViewState.LoggedIn) {
+    val loadingState by viewModel.loadingState.collectAsState()
+    val user = viewModel.loggedInUser.observeAsState().value
+    if (loadingState == LoadingState.Loading) {
+        LoadingProgressBar(loadingState = loadingState)
+    } else if (loadingState == LoadingState.Success) {
         Column(
             Modifier
                 .verticalScroll(rememberScrollState())
@@ -54,20 +50,18 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            if (loadingState == ExpenzViewModel.LoadingState.Loading) {
-                LoadingProgressBar(loadingState = loadingState)
-            } else if (loadingState == ExpenzViewModel.LoadingState.Success && user !=null) {
+            if (user != null) {
                 PieChart(
                     data =
                     mapOf(
-                        Pair(INCOME, user!!.totalIncome.toInt()),
-                        Pair(EXPENSE, user!!.totalExpense.toInt()),
-                        Pair(SUBSCRIPTION, user!!.totalSubscription.toInt()),
+                        Pair(INCOME, user.totalIncome.toInt()),
+                        Pair(EXPENSE, user.totalExpense.toInt()),
+                        Pair(SUBSCRIPTION, user.totalSubscription.toInt()),
                     ),
                 )
-                TotalIncomeExpenseCard(navController, user!!, viewModel)
+                TotalIncomeExpenseCard(navController, user, viewModel)
             }
-      //  }
+        }
     }
 }
 
@@ -89,11 +83,11 @@ fun TotalIncomeExpenseCard(
                 .height(150.dp)
                 .align(Alignment.CenterStart)
                 .clickable {
-                    viewModel.filterIEList(INCOME)
+                    viewModel.setFilter(INCOME)
                     navController.navigate(Screen.IncomeList.route)
                 },
-            elevation = 10.dp,
-            backgroundColor = ExpenzTheme.colorScheme.primaryContainer,
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+            colors = CardDefaults.cardColors(containerColor = ExpenzTheme.colorScheme.primary)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -104,7 +98,7 @@ fun TotalIncomeExpenseCard(
                     modifier = Modifier.padding(10.dp),
                     style = MaterialTheme.typography.headlineMedium,
                     fontSize = 25.sp,
-                    color = ExpenzTheme.colorScheme.onPrimaryContainer,
+                    color = ExpenzTheme.colorScheme.onPrimary,
                 )
 
                 Text(
@@ -112,7 +106,7 @@ fun TotalIncomeExpenseCard(
                     modifier = Modifier.padding(top = 25.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     fontSize = 20.sp,
-                    color = ExpenzTheme.colorScheme.onPrimaryContainer,
+                    color = ExpenzTheme.colorScheme.onPrimary,
                 )
             }
         }
@@ -123,11 +117,11 @@ fun TotalIncomeExpenseCard(
                 .height(150.dp)
                 .align(Alignment.CenterEnd)
                 .clickable {
-                    viewModel.filterIEList(EXPENSE)
+                    viewModel.setFilter(EXPENSE)
                     navController.navigate(Screen.ExpenseList.route)
                 },
-            elevation = 10.dp,
-            backgroundColor = ExpenzTheme.colorScheme.primaryContainer,
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+            colors = CardDefaults.cardColors(containerColor = ExpenzTheme.colorScheme.primary)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -138,14 +132,14 @@ fun TotalIncomeExpenseCard(
                     modifier = Modifier.padding(10.dp),
                     style = ExpenzTheme.typography.headlineMedium,
                     fontSize = 25.sp,
-                    color = ExpenzTheme.colorScheme.onPrimaryContainer,
+                    color = ExpenzTheme.colorScheme.onPrimary,
                 )
                 Text(
                     text = stringResource(id = R.string.dollar) + user.totalExpense.toString(),
                     modifier = Modifier.padding(top = 25.dp),
                     style = ExpenzTheme.typography.bodyMedium,
                     fontSize = 20.sp,
-                    color = ExpenzTheme.colorScheme.onPrimaryContainer,
+                    color = ExpenzTheme.colorScheme.onPrimary,
                 )
             }
         }

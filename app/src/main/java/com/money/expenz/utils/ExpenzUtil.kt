@@ -7,4 +7,8 @@ class ExpenzUtil {
         const val EXPENSE = "Expense"
         const val SUBSCRIPTION = "Subscription"
     }
+
+    object UserSession {
+        var userId: Int? = null
+    }
 }

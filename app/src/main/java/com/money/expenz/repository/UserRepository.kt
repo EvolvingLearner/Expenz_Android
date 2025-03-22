@@ -18,8 +18,8 @@ class UserRepository(private val userDAO: UserDAO) {
     }
 
     @WorkerThread
-    fun getUserWithIEDetails(): Flow<List<UserWithIEDetails>> {
-        return userDAO.getUserWithIEDetails()
+    fun getUserWithIEDetails(loggedInUserId: Int): UserWithIEDetails {
+        return userDAO.getUserWithIEDetails(loggedInUserId)
     }
 
     @WorkerThread
@@ -28,7 +28,7 @@ class UserRepository(private val userDAO: UserDAO) {
     }
 
     @WorkerThread
-    suspend fun insertUserData(user: User) {
+    suspend fun insertUserData(user: User) : Long {
         return userDAO.insertUser(user)
     }
 

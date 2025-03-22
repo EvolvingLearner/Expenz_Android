@@ -23,10 +23,12 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +42,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -48,12 +51,13 @@ import com.money.expenz.data.IEDetails
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.ui.home.ExpenzViewModel
 import com.money.expenz.ui.home.ExpenzViewModel.LoadingState
+import com.money.expenz.utils.Category_List
+import com.money.expenz.utils.ExpenzUtil
 import com.money.expenz.utils.ExpenzUtil.Companion.EXPENSE
 import com.money.expenz.utils.ExpenzUtil.Companion.INCOME
 import com.money.expenz.utils.ExpenzUtil.Companion.SUBSCRIPTION
 import java.util.Calendar
 import java.util.Date
-import com.money.expenz.utils.Category_List
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,12 +66,25 @@ fun AddScreen(
     viewModel: ExpenzViewModel,
 ) {
     val iedetailsToEdit = viewModel.iedetailsToEdit
-    val loadingState by viewModel.loadingState
+    val loadingState by viewModel.loadingState.collectAsState()
     val radioValue = remember { mutableStateOf(iedetailsToEdit?.ie ?: "") }
     val category = remember { mutableStateOf(iedetailsToEdit?.category ?: "") }
     val amount = remember { mutableStateOf(iedetailsToEdit?.amount?.toString() ?: "") }
     val date = remember { mutableStateOf(iedetailsToEdit?.date ?: "") }
     val notes = remember { mutableStateOf(iedetailsToEdit?.notes ?: "") }
+
+    // Error states
+    val categoryError = remember { mutableStateOf(false) }
+    val amountError = remember { mutableStateOf(false) }
+    val dateError = remember { mutableStateOf(false) }
+
+    fun validate(): Boolean {
+        categoryError.value = category.value.isBlank()
+        amountError.value = amount.value.isBlank() || amount.value.toDoubleOrNull() == null
+        dateError.value = date.value.isBlank()
+        return !(amountError.value || dateError.value)
+    }
+
     Box(
         modifier =
         Modifier
@@ -80,34 +97,37 @@ fun AddScreen(
                 .fillMaxWidth()
                 .align(alignment = Alignment.BottomCenter),
             onClick = {
-                val ieDetails = IEDetails(
-                    ie = radioValue.value,
-                    category = category.value,
-                    amount = amount.value.toIntOrNull() ?: 0,
-                    date = date.value,
-                    notes = notes.value,
-                    userId = viewModel.loggedInUserId ?: 0,
-                )
-                if (iedetailsToEdit != null) {
-                    ieDetails.ieId = iedetailsToEdit.ieId
-                    viewModel.updateIEDetails(ieDetails)
-                } else {
-                    viewModel.insertIEDetails(ieDetails)
-                    viewModel.updateUserIEAmount(amount.value.toInt(), radioValue.value, false)
-                }
-                if (loadingState == LoadingState.Success) {
-                    navController.navigate(BottomNavItem.Home.route) {
-                        viewModel.iedetailsToEdit = null
-                        popUpTo(BottomNavItem.Home.route) { inclusive = true }
+                if (validate()) {
+                    val ieDetails = IEDetails(
+                        ie = radioValue.value,
+                        category = category.value,
+                        amount = amount.value.toIntOrNull() ?: 0,
+                        date = date.value,
+                        notes = notes.value,
+                        userId = ExpenzUtil.UserSession.userId ?: 0,
+                    )
+                    if (iedetailsToEdit != null) {
+                        ieDetails.ieId = iedetailsToEdit.ieId
+                        viewModel.updateIEDetails(ieDetails)
+                        viewModel.updateUserIEAmount(amount.value.toInt(), radioValue.value, false)
+                    } else {
+                        viewModel.insertIEDetails(ieDetails)
+                        viewModel.updateUserIEAmount(amount.value.toInt(), radioValue.value, false)
+                    }
+                    if (loadingState == LoadingState.Success) {
+                        navController.navigate(BottomNavItem.Home.route) {
+                            viewModel.iedetailsToEdit = null
+                            popUpTo(BottomNavItem.Home.route) { inclusive = true }
+                        }
                     }
                 }
             },
-            colors = ButtonDefaults.buttonColors(containerColor = ExpenzTheme.colorScheme.primaryContainer),
+            colors = ButtonDefaults.buttonColors(containerColor = ExpenzTheme.colorScheme.primary),
             shape = CutCornerShape(10),
         ) {
             Text(
                 text = stringResource(id = if (iedetailsToEdit != null) R.string.update else R.string.add),
-                color = ExpenzTheme.colorScheme.onSurfaceVariant,
+                color = ExpenzTheme.colorScheme.onPrimary,
                 style = ExpenzTheme.typography.labelLarge,
             )
         }
@@ -173,16 +193,15 @@ fun AddScreen(
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = {
-                    expanded = !expanded
+                    expanded = it
                 },
             ) {
                 TextField(
                     modifier =
-                    Modifier
-                        .menuAnchor()
-                        .fillMaxWidth(),
+                    Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryEditable),
                     readOnly = true,
                     value = category.value,
+                    isError = categoryError.value,
                     onValueChange = { category.value = it },
                     label = { Text(text = stringResource(id = R.string.category)) },
                     trailingIcon = {
@@ -192,6 +211,7 @@ fun AddScreen(
                     },
                     colors = ExposedDropdownMenuDefaults.textFieldColors(),
                 )
+
                 ExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = {
@@ -209,6 +229,7 @@ fun AddScreen(
                     }
                 }
             }
+            if (categoryError.value) Text("This field is required", color = ExpenzTheme.colorScheme.error, fontSize = 12.sp)
         }
         // Line Space
         Spacer(modifier = Modifier.width(20.dp))
@@ -218,6 +239,7 @@ fun AddScreen(
         TextField(
             value = amount.value,
             onValueChange = { amount.value = it },
+            isError = amountError.value,
             modifier =
             Modifier
                 .fillMaxWidth()
@@ -233,6 +255,9 @@ fun AddScreen(
             placeholder = { Text(text = stringResource(id = R.string.enter_amount)) },
         )
         textFieldValue.value = TextFieldValue(amount.value)
+        if (amountError.value) Text("Enter a valid amount", modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp), color = ExpenzTheme.colorScheme.error, fontSize = 12.sp)
 
         // Line Space
         Spacer(modifier = Modifier.width(20.dp))
@@ -294,6 +319,7 @@ fun AddScreen(
             )
             textState.value = TextFieldValue(mDate.value)
             date.value = mDate.value
+            if (dateError.value) Text("Date field is required", color = ExpenzTheme.colorScheme.error, fontSize = 12.sp)
         }
 
         // Line Space
@@ -341,6 +367,7 @@ fun ReadonlyTextField(
         )
     }
 }
+
 
 @Preview
 @Composable

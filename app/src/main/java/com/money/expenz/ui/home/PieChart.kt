@@ -33,9 +33,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.money.expenz.ui.theme.Black
-import com.money.expenz.ui.theme.Pink80
-import com.money.expenz.ui.theme.PurpleGrey80
+import com.money.expenz.model.ExpenzAppBar.ExpenzTheme.colorScheme
 
 @Composable
 fun PieChart(
@@ -59,9 +57,9 @@ fun PieChart(
     // so that each data will get a color
     val colors =
         listOf(
-            PurpleGrey80,
-            Black,
-            Pink80,
+            colorScheme.outlineVariant,
+            colorScheme.tertiary,
+            colorScheme.inversePrimary
         )
 
     var animationPlayed by remember { mutableStateOf(false) }
@@ -97,7 +95,7 @@ fun PieChart(
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // Pie Chart using Canvas Arc
@@ -187,14 +185,14 @@ fun DetailsPieChartItem(
                     text = data.first,
                     fontWeight = FontWeight.Medium,
                     fontSize = 12.sp,
-                    color = Color.Black,
+                    color = colorScheme.onSurfaceVariant,
                 )
                 Text(
                     modifier = Modifier.padding(start = 15.dp),
                     text = data.second.toString(),
                     fontWeight = FontWeight.Medium,
                     fontSize = 12.sp,
-                    color = Color.Gray,
+                    color = colorScheme.outlineVariant,
                 )
             }
         }

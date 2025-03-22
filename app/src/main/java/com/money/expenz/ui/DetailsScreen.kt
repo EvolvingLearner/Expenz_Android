@@ -1,6 +1,5 @@
 package com.money.expenz.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.money.expenz.R
-import com.money.expenz.data.IEDetails
 import com.money.expenz.data.asMap
 import com.money.expenz.data.toIEDetailsDTO
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
@@ -79,7 +77,7 @@ fun LoadDetailsFromList(
                         message = "Are you sure you want to delete this item?",
                         onYes = {
                             viewModel.deleteIE()
-                            navController.navigate(Screen.Home.route){
+                            navController.navigate(Screen.Home.route) {
                                 popUpTo(BottomNavItem.Home.route) { inclusive = true }
                             }
                         },
@@ -101,7 +99,7 @@ fun LoadDetailsFromList(
             ExpenzAlertDialog(viewModel)
         }
     }
-    LazyColumn(modifier = Modifier.background(ExpenzTheme.colorScheme.onPrimary)) {
+    LazyColumn {
         if (list != null) {
             items(list) { entry ->
                 ShowDetails(viewModel = viewModel, details = entry)

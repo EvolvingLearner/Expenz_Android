@@ -1,14 +1,15 @@
 package com.money.expenz.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Divider
+import androidx.compose.material3.Divider
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,7 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.money.expenz.R
 import com.money.expenz.data.Subscription
-import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
+import com.money.expenz.model.ExpenzAppBar.ExpenzTheme.colorScheme
 import com.money.expenz.ui.home.ExpenzViewModel
 import com.money.expenz.ui.theme.Typography
 
@@ -36,16 +37,17 @@ fun SubscriptionsScreen(
     val subscriptionList by viewModel.subscriptionList.collectAsState()
 
     val errorState by viewModel.errorState.collectAsState()
-    SubscriptionList(subscriptions = subscriptionList, navController)
+    SubscriptionList(subscriptions = subscriptionList, navController,viewModel)
 }
 
 @Composable
 fun SubscriptionList(
     subscriptions: List<Subscription>,
     navController: NavController,
+    viewModel: ExpenzViewModel
 ) {
-    LazyColumn(modifier = Modifier.background(ExpenzTheme.colorScheme.onPrimary)) {
-        items(subscriptions) { subscription -> SubscriptionCard(subscription, navController) }
+    LazyColumn {
+        items(subscriptions) { subscription -> SubscriptionCard(subscription, navController,viewModel) }
     }
 }
 
@@ -53,47 +55,63 @@ fun SubscriptionList(
 fun SubscriptionCard(
     subscription: Subscription,
     navController: NavController,
+    viewModel: ExpenzViewModel
 ) {
-    Row(
-        modifier = Modifier.clickable { navController.navigate(Screen.Details.route) },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start,
+    OutlinedCard(
+        modifier =
+        Modifier
+            .background(colorScheme.secondaryContainer)
+            /*.clickable {
+                viewModel.getIEDetails(subscription.userId)
+                navController.navigate(Screen.Details.route)
+            }*/
+            .fillMaxWidth()
+            .padding(top = 5.dp),
     ) {
         Row(
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.Start,
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(
+                        text = subscription.category,
+                        modifier = Modifier.padding(start = 15.dp, top = 10.dp),
+                        style = Typography.bodySmall,
+                        fontSize = 20.sp,
+                        overflow = TextOverflow.Ellipsis,
+                        lineHeight = 1.5.em,
+                        textAlign = TextAlign.Start,
+                        color = colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = subscription.date,
+                        modifier = Modifier.padding(start = 15.dp, bottom = 10.dp),
+                        style = Typography.bodySmall,
+                        fontSize = 15.sp,
+                        overflow = TextOverflow.Ellipsis,
+                        lineHeight = 1.5.em,
+                        color = colorScheme.onSurfaceVariant
+                    )
+                }
+
                 Text(
-                    text = subscription.category,
-                    modifier = Modifier.padding(start = 15.dp, top = 10.dp),
+                    text = stringResource(id = R.string.dollar) + subscription.amount.toString(),
+                    modifier = Modifier.padding(end = 15.dp),
                     style = Typography.bodySmall,
                     fontSize = 20.sp,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 1.5.em,
-                    textAlign = TextAlign.Start,
-                )
-                Text(
-                    text = subscription.date,
-                    modifier = Modifier.padding(start = 15.dp, bottom = 10.dp),
-                    style = Typography.bodySmall,
-                    fontSize = 15.sp,
-                    overflow = TextOverflow.Ellipsis,
-                    lineHeight = 1.5.em,
+                    textAlign = TextAlign.End,
+                    color = colorScheme.onSurfaceVariant
                 )
             }
-
-            Text(
-                text = stringResource(id = R.string.dollar) + subscription.amount.toString(),
-                modifier = Modifier.padding(end = 15.dp),
-                style = Typography.bodySmall,
-                fontSize = 20.sp,
-                overflow = TextOverflow.Ellipsis,
-                lineHeight = 1.5.em,
-                textAlign = TextAlign.End,
-            )
         }
     }
     Divider()
