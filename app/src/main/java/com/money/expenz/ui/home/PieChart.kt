@@ -33,9 +33,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.money.expenz.ui.theme.Black
-import com.money.expenz.ui.theme.Pink80
-import com.money.expenz.ui.theme.PurpleGrey80
+import com.money.expenz.model.ExpenzAppBar.ExpenzTheme.colorScheme
 
 @Composable
 fun PieChart(
@@ -44,7 +42,6 @@ fun PieChart(
     chartBarWidth: Dp = 35.dp,
     animDuration: Int = 1000,
 ) {
-
     val totalSum = data.values.sum()
     val floatValue = mutableListOf<Float>()
 
@@ -58,11 +55,12 @@ fun PieChart(
 
     // add the colors as per the number of data(no. of pie chart entries)
     // so that each data will get a color
-    val colors = listOf(
-        PurpleGrey80,
-        Black,
-        Pink80
-    )
+    val colors =
+        listOf(
+            colorScheme.outlineVariant,
+            colorScheme.tertiary,
+            colorScheme.inversePrimary
+        )
 
     var animationPlayed by remember { mutableStateOf(false) }
 
@@ -71,22 +69,24 @@ fun PieChart(
     // it is the diameter value of the Pie
     val animateSize by animateFloatAsState(
         targetValue = if (animationPlayed) radiusOuter.value * 2f else 0f,
-        animationSpec = tween(
-            durationMillis = animDuration,
-            delayMillis = 0,
-            easing = LinearOutSlowInEasing
-        )
+        animationSpec =
+            tween(
+                durationMillis = animDuration,
+                delayMillis = 0,
+                easing = LinearOutSlowInEasing,
+            ),
     )
 
     // if you want to stabilize the Pie Chart you can use value -90f
     // 90f is used to complete 1/4 of the rotation
     val animateRotation by animateFloatAsState(
         targetValue = if (animationPlayed) 90f * 11f else 0f,
-        animationSpec = tween(
-            durationMillis = animDuration,
-            delayMillis = 0,
-            easing = LinearOutSlowInEasing
-        )
+        animationSpec =
+            tween(
+                durationMillis = animDuration,
+                delayMillis = 0,
+                easing = LinearOutSlowInEasing,
+            ),
     )
 
     // to play the animation only once when the function is Created or Recomposed
@@ -95,20 +95,20 @@ fun PieChart(
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-
         // Pie Chart using Canvas Arc
         Box(
             modifier = Modifier.size(animateSize.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Canvas(
-                modifier = Modifier
-                    .offset { IntOffset.Zero }
-                    .size(radiusOuter * 2f)
-                    .rotate(animateRotation)
+                modifier =
+                    Modifier
+                        .offset { IntOffset.Zero }
+                        .size(radiusOuter * 2f)
+                        .rotate(animateRotation),
             ) {
                 // draw each Arc for each data entry in Pie Chart
                 floatValue.forEachIndexed { index, value ->
@@ -117,7 +117,7 @@ fun PieChart(
                         lastValue,
                         value,
                         useCenter = false,
-                        style = Stroke(chartBarWidth.toPx(), cap = StrokeCap.Butt)
+                        style = Stroke(chartBarWidth.toPx(), cap = StrokeCap.Butt),
                     )
                     lastValue += value
                 }
@@ -128,7 +128,7 @@ fun PieChart(
         // Compose Function in which Items are showing data
         DetailsPieChart(
             data = data,
-            colors = colors
+            colors = colors,
         )
     }
 }
@@ -136,18 +136,18 @@ fun PieChart(
 @Composable
 fun DetailsPieChart(
     data: Map<String, Int>,
-    colors: List<Color>
+    colors: List<Color>,
 ) {
     Column(
         modifier = Modifier.padding(top = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         // create the data items
         data.values.forEachIndexed { index, value ->
             DetailsPieChartItem(
                 data = Pair(data.keys.elementAt(index), value),
-                color = colors[index]
+                color = colors[index],
             )
         }
     }
@@ -157,27 +157,26 @@ fun DetailsPieChart(
 fun DetailsPieChartItem(
     data: Pair<String, Int>,
     height: Dp = 25.dp,
-    color: Color
+    color: Color,
 ) {
-
     Surface(
-        modifier = Modifier
-            .padding(vertical = 10.dp, horizontal = 40.dp),
-        color = Color.Transparent
+        modifier =
+            Modifier
+                .padding(vertical = 10.dp, horizontal = 40.dp),
+        color = Color.Transparent,
     ) {
         Row(
-
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-
             Box(
-                modifier = Modifier
-                    .background(
-                        color = color,
-                        shape = RoundedCornerShape(10.dp)
-                    )
-                    .size(height)
+                modifier =
+                    Modifier
+                        .background(
+                            color = color,
+                            shape = RoundedCornerShape(10.dp),
+                        )
+                        .size(height),
             )
 
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -186,14 +185,14 @@ fun DetailsPieChartItem(
                     text = data.first,
                     fontWeight = FontWeight.Medium,
                     fontSize = 12.sp,
-                    color = Color.Black
+                    color = colorScheme.onSurfaceVariant,
                 )
                 Text(
                     modifier = Modifier.padding(start = 15.dp),
                     text = data.second.toString(),
                     fontWeight = FontWeight.Medium,
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = colorScheme.outlineVariant,
                 )
             }
         }

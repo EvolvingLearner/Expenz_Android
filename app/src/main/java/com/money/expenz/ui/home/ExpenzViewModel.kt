@@ -1,22 +1,35 @@
 package com.money.expenz.ui.home
 
 import android.util.Log
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.money.expenz.data.IEDetails
+import com.money.expenz.data.Subscription
 import com.money.expenz.data.User
 import com.money.expenz.data.UserWithIEDetails
 import com.money.expenz.repository.UserRepository
 import com.money.expenz.utils.ExpenzUtil
+import com.money.expenz.utils.ExpenzUtil.Companion.EXPENSE
+import com.money.expenz.utils.ExpenzUtil.Companion.INCOME
+import com.money.expenz.utils.ExpenzUtil.Companion.SUBSCRIPTION
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -24,157 +37,203 @@ import kotlinx.coroutines.launch
  * to provide livedata objects to handle UI events
  */
 
-class ExpenzViewModel(private val repository: UserRepository) : ViewModel() {
-    sealed class ViewState {
-        object Loading : ViewState() // hasLoggedIn = unknown
+class ExpenzViewModel(
+    private val repository: UserRepository,
+) : ViewModel() {
 
-        object LoggedIn : ViewState() // hasLoggedIn = true
-
-        object NotLoggedIn : ViewState() // hasLoggedIn = false
+    enum class LoadingState {
+        Loading,
+        Success,
+        Error
     }
 
-    private val hasLoggedIn = MutableStateFlow(false)
+    private val progressBarLoadingState = MutableStateFlow(LoadingState.Loading)
+    val loadingState: StateFlow<LoadingState> = progressBarLoadingState
 
-    val viewState =
-        hasLoggedIn.map { hasLoggedIn ->
-            if (hasLoggedIn) {
-                ViewState.LoggedIn
-            } else {
-                ViewState.NotLoggedIn
-            }
-        }
+    var showDialog by mutableStateOf(false)
+        private set
 
-    var loggedInUserId = MutableLiveData(0)
+    var dialogTitle by mutableStateOf("Alert")
+        private set
 
-    private var dbusers: MutableList<User> = mutableListOf()
-    private var dbUsersWithIE: MutableList<UserWithIEDetails> = mutableListOf()
+    var dialogMessage by mutableStateOf("Are you sure?")
+        private set
 
-    var _loggedInUser = MutableLiveData<User>()
-    val loggedInUser: LiveData<User> get() = _loggedInUser
+    var onYesClicked: (() -> Unit)? = null
+    var onNoClicked: (() -> Unit)? = null
+    var iedetailsToEdit: IEDetails? = null
 
-    private var _ieDetails: MutableList<IEDetails> = mutableListOf()
-    var ieDetailsList: List<IEDetails> = listOf()
+    var loggedInUserData = MutableLiveData<User>()
+    val loggedInUser: LiveData<User> = loggedInUserData
 
-    private var _selectedIEDetails = MutableLiveData<IEDetails>()
-    val selectedIEDetails: LiveData<IEDetails> get() = _selectedIEDetails
+    private var ieDetailsListData: MutableList<IEDetails> = mutableListOf()
 
-    private var _userName = ""
-    private var _password = ""
+    private val selectedCategory = MutableStateFlow<String?>(null)
+
+    private val expenzTypeListData = MutableStateFlow<List<IEDetails>>(emptyList())
+
+    private var selectedIEDetailsData = MutableLiveData<IEDetails>()
+    val selectedIEDetails: LiveData<IEDetails> get() = selectedIEDetailsData
+
+    private val subscriptionListData = MutableStateFlow<List<Subscription>>(emptyList())
+    val subscriptionList: StateFlow<List<Subscription>> get() = subscriptionListData
+
+    // Error handling using StateFlow
+    private val errorStateData = MutableStateFlow<String?>(null)
+    val errorState: StateFlow<String?> get() = errorStateData
+
+    private var currentUserName = ""
+    private var currentUserPassword = ""
 
     private var job: Job? = null
-
-    init {
-        getDatabaseUsers()
-    }
 
     private val exceptionHandler =
         CoroutineExceptionHandler { _, throwable ->
             notifyError(throwable)
         }
 
-    private fun getDatabaseUsers() {
-        viewModelScope.launch {
-            repository.getUsers()?.catch { exceptionHandler }
-                ?.collect { users ->
-                    dbusers = users.toMutableList()
-                    users.forEach { loggedInUser ->
-                        if (loggedInUser.userName == _userName && loggedInUser.password == _password) {
-                            loggedInUserId.value = loggedInUser.id
-                            _loggedInUser.value = loggedInUser
-                            setLoggedIn(true)
-                        } else setLoggedIn(false)
-                    }
-                }
-        }
-    }
-
-    private fun getUserWithIEDetails() {
-        job =
-            viewModelScope.launch {
-                repository.getUserWithIEDetails().flowOn(Dispatchers.IO).catch { exceptionHandler }
-                    .collect { users ->
-                        dbUsersWithIE = users.toMutableList()
-                        users.forEach { activeUser ->
-                            if ((activeUser.user.id == loggedInUserId.value)) {
-                                setLoggedIn(true)
-                                _loggedInUser.value = activeUser.user
-                                _ieDetails = activeUser.ieDetails.toMutableList()
-                            } else
-                                setLoggedIn(false)
-                        }
-                    }
+    val filteredExpenzTypeList: StateFlow<List<IEDetails>> =
+        combine(expenzTypeListData, selectedCategory) { list, category ->
+            when (category) {
+                EXPENSE -> list.filter { it.ie == EXPENSE || it.ie == SUBSCRIPTION }
+                INCOME -> list.filter { it.ie == INCOME }
+                null -> list // Show all if no category is selected
+                else -> emptyList()
             }
+        }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    fun getUserWithIEDetails() {
+        progressBarLoadingState.value = LoadingState.Loading
+        job = viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
+            val userWithIEDetails =
+                repository.getUserWithIEDetails(ExpenzUtil.UserSession.userId ?: 0)
+            loggedInUserData.postValue(userWithIEDetails.user)
+            ieDetailsListData = userWithIEDetails.ieDetails.toMutableList()
+            expenzTypeListData.value = userWithIEDetails.ieDetails
+            progressBarLoadingState.value = LoadingState.Success
+        }
     }
 
     private fun notifyError(exception: Throwable) {
         Log.d("ExpenzViewModel", "Exception ${exception.localizedMessage}")
+        progressBarLoadingState.value = LoadingState.Error
+        errorStateData.value = "Error: ${exception.message}"
     }
 
-    fun checkUserInDB(
-        userName: String,
-        password: String,
-    ): Boolean {
-        getDatabaseUsers()
-        dbusers.forEach { activeUser ->
-            if ((activeUser.userName == userName) && (activeUser.password == password)) {
-                setLoggedIn(true)
-                getLoggedInUserDetails(activeUser.id)
-                loggedInUserId.value = activeUser.id
-                return true
-            }
-        }
-        return false
-    }
-
-    private fun getLoggedInUserDetails(loggedInUserId: Int) {
+    fun getLoggedInUserDetails(loggedInUserId: Int) {
+        progressBarLoadingState.value = LoadingState.Loading
         viewModelScope.launch {
-            _loggedInUser.value = repository.getLoggedInUserDetails(loggedInUserId)
+            loggedInUserData.value = repository.getLoggedInUserDetails(loggedInUserId)
         }
-        getUserWithIEDetails()
-    }
-
-    fun registerUser(registerUser: User) {
-        _userName = registerUser.userName
-        _password = registerUser.password
-        viewModelScope.launch {
-            repository.insertUserData(registerUser)
-        }
-        setLoggedIn(true)
+        progressBarLoadingState.value = LoadingState.Success
     }
 
     fun insertIEDetails(ieDetails: IEDetails) {
+        progressBarLoadingState.value = LoadingState.Loading
         viewModelScope.launch { repository.insertIEDetails(ieDetails) }
+        if (ieDetails.ie == SUBSCRIPTION) {
+            val subscription =
+                Subscription(
+                    category = ieDetails.category,
+                    amount = ieDetails.amount,
+                    date = ieDetails.date,
+                    notes = ieDetails.notes,
+                    userId = ieDetails.userId,
+                )
+            insertSubscription(subscription)
+        }
     }
 
-    fun updateUserDetails(
+    fun insertSubscription(subscription: Subscription) {
+        viewModelScope.launch { repository.insertSubscription(subscription) }
+    }
+
+    fun updateUserIEAmount(
         amount: Int,
         ieValue: String,
+        isDeleted: Boolean
     ) {
-        if (ieValue == ExpenzUtil.INCOME) {
-            _loggedInUser.value?.totalIncome = _loggedInUser.value?.totalIncome?.plus(amount)!!
-        } else if (ieValue == ExpenzUtil.EXPENSE || ieValue == ExpenzUtil.SUBSCRIPTION) {
-            _loggedInUser.value?.totalExpense = _loggedInUser.value?.totalExpense?.plus(amount)!!
+        progressBarLoadingState.value = LoadingState.Loading
+        loggedInUserData.value?.let { user ->
+            val adjustmentAmount = if (isDeleted) -amount else amount
+            when (ieValue) {
+                INCOME -> {
+                    user.totalIncome = user.totalIncome + adjustmentAmount
+                }
+
+                EXPENSE, SUBSCRIPTION -> {
+                    user.totalExpense = user.totalExpense + adjustmentAmount
+                    if (ieValue == SUBSCRIPTION) {
+                        user.totalSubscription = user.totalSubscription + adjustmentAmount
+                    }
+                }
+            }
+            updateUserDetails(user)
         }
-        viewModelScope.launch { _loggedInUser.value?.let { repository.updateUserDetails(it) } }
+        progressBarLoadingState.value = LoadingState.Success
     }
 
-    private fun setLoggedIn(boolean: Boolean) {
-        hasLoggedIn.value = boolean
+    fun updateIEDetails(ieDetails: IEDetails) {
+        progressBarLoadingState.value = LoadingState.Loading
+        viewModelScope.launch {
+            repository.updateIEDetails(ieDetails)
+        }
+        //getUserWithIEDetails()
     }
 
-    fun filterIEList(category: String) {
-        ieDetailsList = _ieDetails.filter { item -> item.ie == category }
-        // job = viewModelScope.launch { _ieDetails = repository.searchIECategory(category) }
+    fun updateUserDetails(user: User) {
+        viewModelScope.launch { repository.updateUserDetails(user) }
+    }
+
+    fun setFilter(category: String?) {
+        selectedCategory.value = category
     }
 
     fun getIEDetails(ieID: Int) {
-        dbUsersWithIE.forEach {
-            it.ieDetails.forEach { ie ->
-                if (ie.ieId == ieID) {
-                    _selectedIEDetails.value = ie
-                }
+        ieDetailsListData.forEach { ie ->
+            if (ie.ieId == ieID) {
+                selectedIEDetailsData.value = ie
+                iedetailsToEdit = ie
             }
         }
+    }
+
+    fun getSubscriptionList() {
+        viewModelScope.launch {
+            repository
+                .getAllSubscriptions()
+                .catch { exception ->
+                    // Handle the exception (e.g., update error state)
+                    errorStateData.value = "Error: ${exception.message}"
+                }.collect { subscriptions ->
+                    // Collect the list of subscriptions and update the StateFlow
+                    subscriptionListData.value = subscriptions
+                }
+        }
+    }
+
+    fun deleteIE() {
+        selectedIEDetailsData.value?.let {
+            viewModelScope.launch { repository.deleteIE(it) }
+            updateUserIEAmount(it.amount, it.ie, true)
+        }
+    }
+
+    fun showDialog(
+        title: String,
+        message: String,
+        onYes: () -> Unit,
+        onNo: () -> Unit
+    ) {
+        dialogTitle = title
+        dialogMessage = message
+        onYesClicked = onYes
+        onNoClicked = onNo
+        showDialog = true
+    }
+
+    fun hideDialog() {
+        showDialog = false
     }
 
     override fun onCleared() {

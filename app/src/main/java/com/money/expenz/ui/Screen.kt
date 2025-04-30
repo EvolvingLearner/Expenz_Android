@@ -3,9 +3,10 @@ package com.money.expenz.ui
 import androidx.annotation.StringRes
 import com.money.expenz.R
 import com.money.expenz.utils.Add_Screen
-import com.money.expenz.utils.Data_List_Screen
 import com.money.expenz.utils.Details_Screen
+import com.money.expenz.utils.Expense_List_Screen
 import com.money.expenz.utils.Home_Screen
+import com.money.expenz.utils.Income_List_Screen
 import com.money.expenz.utils.Login_Screen
 import com.money.expenz.utils.Register_Screen
 import com.money.expenz.utils.Subscription_Screen
@@ -26,7 +27,9 @@ sealed class Screen(
 
     data object Details : Screen(Details_Screen, R.string.details)
 
-    data object DataList : Screen(Data_List_Screen, R.string.data_list)
+    data object IncomeList : Screen(Income_List_Screen, R.string.income_list)
+
+    data object ExpenseList : Screen(Expense_List_Screen, R.string.expense_list)
 
     companion object {
         fun valueOf(route: String?) =
@@ -36,7 +39,8 @@ sealed class Screen(
                 Home_Screen -> Home
                 Add_Screen -> Add
                 Subscription_Screen -> Subscription
-                Data_List_Screen -> DataList
+                Income_List_Screen -> IncomeList
+                Expense_List_Screen -> ExpenseList
                 Details_Screen -> Details
                 else -> Home
             }

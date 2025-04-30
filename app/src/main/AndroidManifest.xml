@@ -14,15 +14,18 @@
         android:theme="@style/Theme.Expenz.NoActionBar"
         tools:targetApi="31">
         <activity
-            android:name="com.money.expenz.BaseActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Expenz.NoActionBar">
+            android:name=".ui.login.LoginActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
+        </activity>
+        <activity
+            android:name=".BaseActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Expenz.NoActionBar">
             <meta-data
                 android:name="com.money.expenz.BaseActivity"
                 android:value="com.money.expenz.BaseActivity" />

@@ -12,7 +12,8 @@
     <string name="details">Details</string>
     <string name="menu_add">Add</string>
     <string name="menu_subscriptions">Subscriptions</string>
-    <string name="data_list">Income/Expense</string>
+    <string name="income_list">My Income</string>
+    <string name="expense_list">My Expense</string>
 
     // Subscriptions
     <string name="subscriptions">My Subscriptions</string>
@@ -36,5 +37,8 @@
     <string name="any_notes">Any notes?</string>
     <string name="category">Category</string>
     <string name="add">ADD</string>
+    <string name="update">UPDATE</string>
+    <string name="edit">EDIT</string>
+    <string name="delete">DELETE</string>
 
 </resources>

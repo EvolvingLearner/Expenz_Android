@@ -17,19 +17,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +42,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -50,6 +50,9 @@ import com.money.expenz.R
 import com.money.expenz.data.IEDetails
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.ui.home.ExpenzViewModel
+import com.money.expenz.ui.home.ExpenzViewModel.LoadingState
+import com.money.expenz.utils.Category_List
+import com.money.expenz.utils.ExpenzUtil
 import com.money.expenz.utils.ExpenzUtil.Companion.EXPENSE
 import com.money.expenz.utils.ExpenzUtil.Companion.INCOME
 import com.money.expenz.utils.ExpenzUtil.Companion.SUBSCRIPTION
@@ -62,11 +65,26 @@ fun AddScreen(
     navController: NavController,
     viewModel: ExpenzViewModel,
 ) {
-    val radioValue = remember { mutableStateOf("") }
-    val category = remember { mutableStateOf("") }
-    val amount = remember { mutableStateOf("") }
-    val date = remember { mutableStateOf("") }
-    val notes = remember { mutableStateOf("") }
+    val iedetailsToEdit = viewModel.iedetailsToEdit
+    val loadingState by viewModel.loadingState.collectAsState()
+    val radioValue = remember { mutableStateOf(iedetailsToEdit?.ie ?: "") }
+    val category = remember { mutableStateOf(iedetailsToEdit?.category ?: "") }
+    val amount = remember { mutableStateOf(iedetailsToEdit?.amount?.toString() ?: "") }
+    val date = remember { mutableStateOf(iedetailsToEdit?.date ?: "") }
+    val notes = remember { mutableStateOf(iedetailsToEdit?.notes ?: "") }
+
+    // Error states
+    val categoryError = remember { mutableStateOf(false) }
+    val amountError = remember { mutableStateOf(false) }
+    val dateError = remember { mutableStateOf(false) }
+
+    fun validate(): Boolean {
+        categoryError.value = category.value.isBlank()
+        amountError.value = amount.value.isBlank() || amount.value.toDoubleOrNull() == null
+        dateError.value = date.value.isBlank()
+        return !(amountError.value || dateError.value)
+    }
+
     Box(
         modifier =
         Modifier
@@ -79,31 +97,42 @@ fun AddScreen(
                 .fillMaxWidth()
                 .align(alignment = Alignment.BottomCenter),
             onClick = {
-                val ieDetails =
-                    viewModel.loggedInUserId.value?.let {
-                        IEDetails(
-                            ie = radioValue.value,
-                            category = category.value,
-                            amount = amount.value.toIntOrNull() ?: 0,
-                            date = date.value,
-                            notes = notes.value,
-                            userId = it,
-                        )
+                if (validate()) {
+                    val ieDetails = IEDetails(
+                        ie = radioValue.value,
+                        category = category.value,
+                        amount = amount.value.toIntOrNull() ?: 0,
+                        date = date.value,
+                        notes = notes.value,
+                        userId = ExpenzUtil.UserSession.userId ?: 0,
+                    )
+                    if (iedetailsToEdit != null) {
+                        ieDetails.ieId = iedetailsToEdit.ieId
+                        viewModel.updateIEDetails(ieDetails)
+                        viewModel.updateUserIEAmount(amount.value.toInt(), radioValue.value, false)
+                    } else {
+                        viewModel.insertIEDetails(ieDetails)
+                        viewModel.updateUserIEAmount(amount.value.toInt(), radioValue.value, false)
                     }
-                viewModel.insertIEDetails(ieDetails!!)
-                viewModel.updateUserDetails(amount.value.toInt(), radioValue.value)
-                navController.navigate(BottomNavItem.Home.route) {
-                    popUpTo(BottomNavItem.Home.route) { inclusive = true }
+                    if (loadingState == LoadingState.Success) {
+                        navController.navigate(BottomNavItem.Home.route) {
+                            viewModel.iedetailsToEdit = null
+                            popUpTo(BottomNavItem.Home.route) { inclusive = true }
+                        }
+                    }
                 }
             },
-            colors = ButtonDefaults.buttonColors(containerColor = ExpenzTheme.colorScheme.primaryContainer),
+            colors = ButtonDefaults.buttonColors(containerColor = ExpenzTheme.colorScheme.primary),
             shape = CutCornerShape(10),
         ) {
             Text(
-                text = stringResource(id = R.string.add),
-                color = ExpenzTheme.colorScheme.onSurfaceVariant,
+                text = stringResource(id = if (iedetailsToEdit != null) R.string.update else R.string.add),
+                color = ExpenzTheme.colorScheme.onPrimary,
                 style = ExpenzTheme.typography.labelLarge,
             )
+        }
+        if (loadingState == LoadingState.Loading) {
+            LoadingProgressBar(loadingState = loadingState)
         }
     }
     Column(
@@ -117,7 +146,7 @@ fun AddScreen(
         val radioOptions = listOf(INCOME, EXPENSE, SUBSCRIPTION)
         val (selectedOption, onOptionSelected) =
             remember {
-                mutableStateOf(radioOptions[2])
+                mutableStateOf(radioValue.value.takeIf { it in radioOptions } ?: radioOptions[2])
             }
         Column(
             modifier =
@@ -153,20 +182,7 @@ fun AddScreen(
         var expanded by remember {
             mutableStateOf(false)
         }
-        val categories =
-            listOf(
-                "Media",
-                "Electricity",
-                "Travel",
-                "Food",
-                "Shopping",
-                "Gas",
-                "Internet",
-                "Medical",
-                "Pets",
-                "Salary",
-                "Others",
-            )
+        val categories = Category_List
         Column(
             modifier =
             Modifier
@@ -177,29 +193,30 @@ fun AddScreen(
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = {
-                    expanded = !expanded
-                }
+                    expanded = it
+                },
             ) {
                 TextField(
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth(),
+                    modifier =
+                    Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryEditable),
                     readOnly = true,
                     value = category.value,
+                    isError = categoryError.value,
                     onValueChange = { category.value = it },
                     label = { Text(text = stringResource(id = R.string.category)) },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(
-                            expanded = expanded
+                            expanded = expanded,
                         )
                     },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors()
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
                 )
+
                 ExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = {
                         expanded = false
-                    }
+                    },
                 ) {
                     categories.forEach { categorySelected ->
                         DropdownMenuItem(
@@ -212,6 +229,7 @@ fun AddScreen(
                     }
                 }
             }
+            if (categoryError.value) Text("This field is required", color = ExpenzTheme.colorScheme.error, fontSize = 12.sp)
         }
         // Line Space
         Spacer(modifier = Modifier.width(20.dp))
@@ -221,6 +239,7 @@ fun AddScreen(
         TextField(
             value = amount.value,
             onValueChange = { amount.value = it },
+            isError = amountError.value,
             modifier =
             Modifier
                 .fillMaxWidth()
@@ -236,6 +255,9 @@ fun AddScreen(
             placeholder = { Text(text = stringResource(id = R.string.enter_amount)) },
         )
         textFieldValue.value = TextFieldValue(amount.value)
+        if (amountError.value) Text("Enter a valid amount", modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp), color = ExpenzTheme.colorScheme.error, fontSize = 12.sp)
 
         // Line Space
         Spacer(modifier = Modifier.width(20.dp))
@@ -259,7 +281,7 @@ fun AddScreen(
         mCalendar.time = Date()
 
         // Declaring a string value to store date in string format
-        val mDate = remember { mutableStateOf("") }
+        val mDate = remember { mutableStateOf(iedetailsToEdit?.date ?: "") }
 
         // Declaring DatePickerDialog and setting
         // initial values as current values (present year, month and day)
@@ -297,6 +319,7 @@ fun AddScreen(
             )
             textState.value = TextFieldValue(mDate.value)
             date.value = mDate.value
+            if (dateError.value) Text("Date field is required", color = ExpenzTheme.colorScheme.error, fontSize = 12.sp)
         }
 
         // Line Space
@@ -344,6 +367,7 @@ fun ReadonlyTextField(
         )
     }
 }
+
 
 @Preview
 @Composable

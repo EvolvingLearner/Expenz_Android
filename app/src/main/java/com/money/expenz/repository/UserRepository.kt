@@ -2,6 +2,7 @@ package com.money.expenz.repository
 
 import androidx.annotation.WorkerThread
 import com.money.expenz.data.IEDetails
+import com.money.expenz.data.Subscription
 import com.money.expenz.data.User
 import com.money.expenz.data.UserWithIEDetails
 import com.money.expenz.model.UserDAO
@@ -17,8 +18,8 @@ class UserRepository(private val userDAO: UserDAO) {
     }
 
     @WorkerThread
-    fun getUserWithIEDetails(): Flow<List<UserWithIEDetails>> {
-        return userDAO.getUserWithIEDetails()
+    fun getUserWithIEDetails(loggedInUserId: Int): UserWithIEDetails {
+        return userDAO.getUserWithIEDetails(loggedInUserId)
     }
 
     @WorkerThread
@@ -27,7 +28,7 @@ class UserRepository(private val userDAO: UserDAO) {
     }
 
     @WorkerThread
-    suspend fun insertUserData(user: User) {
+    suspend fun insertUserData(user: User) : Long {
         return userDAO.insertUser(user)
     }
 
@@ -36,8 +37,25 @@ class UserRepository(private val userDAO: UserDAO) {
         userDAO.insertIEDetails(ieDetails)
     }
 
+    @WorkerThread
+    suspend fun insertSubscription(subscription: Subscription) {
+        userDAO.insertSubscription(subscription)
+    }
+
     suspend fun updateUserDetails(user: User) {
         userDAO.updateUserDetails(user)
+    }
+    suspend fun updateIEDetails(ieDetails: IEDetails) {
+        userDAO.updateIEDetails(ieDetails)
+    }
+
+    @WorkerThread
+    fun getAllSubscriptions(): Flow<List<Subscription>> {
+        return userDAO.getAllSubscriptions()
+    }
+
+    suspend fun deleteIE(ieDetails: IEDetails){
+        userDAO.deleteUserIEDetails(ieDetails)
     }
 
     @WorkerThread

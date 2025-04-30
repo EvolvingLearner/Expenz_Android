@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -28,6 +30,7 @@ import com.money.expenz.R
 import com.money.expenz.data.IEDetails
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.ui.home.ExpenzViewModel
+import com.money.expenz.ui.home.ExpenzViewModel.LoadingState
 import com.money.expenz.ui.theme.Typography
 
 @Composable
@@ -35,21 +38,30 @@ fun DataListScreen(
     viewModel: ExpenzViewModel,
     navController: NavController,
 ) {
-    if (viewModel.ieDetailsList.isNotEmpty()) {
-        DataList(viewModel, viewModel.ieDetailsList, navController = navController)
-    } else {
-        EmptyMessage()
+    val loadingState by viewModel.loadingState.collectAsState()
+    val expenzList by viewModel.filteredExpenzTypeList.collectAsState()
+
+    when (loadingState) {
+        LoadingState.Loading -> LoadingProgressBar(loadingState)
+        LoadingState.Success -> {
+            if (expenzList.isNotEmpty()) {
+                DataList(viewModel, expenzList, navController = navController)
+            } else {
+                ShowErrorMessage("No List to show")
+            }
+        }
+        else -> ShowErrorMessage("Error Occurred")
     }
 }
 
 @Composable
-fun EmptyMessage() {
+fun ShowErrorMessage(message : String) {
     Column(
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "No List to show",
+            text = message,
             modifier = Modifier.padding(10.dp),
             style = Typography.bodySmall,
             fontSize = 25.sp,
@@ -65,7 +77,7 @@ fun DataList(
     ieDetails: List<IEDetails>,
     navController: NavController,
 ) {
-    LazyColumn(modifier = Modifier.background(ExpenzTheme.colorScheme.surfaceVariant)) {
+    LazyColumn {
         items(ieDetails) { details -> DataCard(viewModel, details, navController) }
     }
 }
@@ -77,21 +89,22 @@ fun DataCard(
     navController: NavController,
 ) {
     OutlinedCard(
-        modifier = Modifier
+        modifier =
+        Modifier
+            .background(ExpenzTheme.colorScheme.secondaryContainer)
             .clickable {
                 viewModel.getIEDetails(user.ieId)
                 navController.navigate(Screen.Details.route)
             }
             .fillMaxWidth()
-            .padding(top = 5.dp)
+            .padding(top = 5.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
-
         ) {
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 Text(
                     text = user.category,
@@ -100,7 +113,7 @@ fun DataCard(
                     fontSize = 20.sp,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 1.5.em,
-                    textAlign = TextAlign.Start
+                    textAlign = TextAlign.Start,
                 )
                 Text(
                     text = user.date,
@@ -119,7 +132,7 @@ fun DataCard(
                 fontSize = 20.sp,
                 overflow = TextOverflow.Ellipsis,
                 lineHeight = 1.5.em,
-                textAlign = TextAlign.End
+                textAlign = TextAlign.End,
             )
         }
     }
