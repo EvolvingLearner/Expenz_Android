@@ -2,6 +2,7 @@ package com.money.expenz.ui.home
 
 import android.util.Log
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -77,6 +78,9 @@ class ExpenzViewModel(
 
     private val subscriptionListData = MutableStateFlow<List<Subscription>>(emptyList())
     val subscriptionList: StateFlow<List<Subscription>> get() = subscriptionListData
+
+    private var selectedSubscriptionDetailsData = MutableLiveData<Subscription>()
+    val selectedSubscriptionDetails: LiveData<Subscription> get() = selectedSubscriptionDetailsData
 
     // Error handling using StateFlow
     private val errorStateData = MutableStateFlow<String?>(null)
@@ -194,6 +198,18 @@ class ExpenzViewModel(
             if (ie.ieId == ieID) {
                 selectedIEDetailsData.value = ie
                 iedetailsToEdit = ie
+            }
+        }
+    }
+
+    fun getSubscriptionDetails(subscriptionID: Int) {
+        viewModelScope.launch {
+            subscriptionListData.collect { subscriptionList ->
+                subscriptionList.forEach { subscription ->
+                    if (subscription.subscriptionId == subscriptionID) {
+                        selectedSubscriptionDetailsData.value = subscription
+                    }
+                }
             }
         }
     }

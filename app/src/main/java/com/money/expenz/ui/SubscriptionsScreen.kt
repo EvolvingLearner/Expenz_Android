@@ -1,6 +1,7 @@
 package com.money.expenz.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -61,10 +62,10 @@ fun SubscriptionCard(
         modifier =
         Modifier
             .background(colorScheme.secondaryContainer)
-            /*.clickable {
-                viewModel.getIEDetails(subscription.userId)
-                navController.navigate(Screen.Details.route)
-            }*/
+            .clickable {
+                viewModel.getSubscriptionDetails(subscription.subscriptionId)
+                navController.navigate(Screen.SubscriptionDetails.route)
+            }
             .fillMaxWidth()
             .padding(top = 5.dp),
     ) {

@@ -27,6 +27,9 @@ fun NavigationSetup(
         composable(Screen.Details.route) {
             DetailsScreen(viewModel, navController)
         }
+        composable(Screen.SubscriptionDetails.route) {
+            SubscriptionDetailsScreen(viewModel, navController)
+        }
         composable(Screen.IncomeList.route) {
             viewModel.getUserWithIEDetails()
             DataListScreen(viewModel, navController)

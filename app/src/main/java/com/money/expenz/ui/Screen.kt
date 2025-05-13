@@ -9,6 +9,7 @@ import com.money.expenz.utils.Home_Screen
 import com.money.expenz.utils.Income_List_Screen
 import com.money.expenz.utils.Login_Screen
 import com.money.expenz.utils.Register_Screen
+import com.money.expenz.utils.Subscription_Details_Screen
 import com.money.expenz.utils.Subscription_Screen
 
 sealed class Screen(
@@ -27,6 +28,8 @@ sealed class Screen(
 
     data object Details : Screen(Details_Screen, R.string.details)
 
+    data object SubscriptionDetails : Screen(Subscription_Details_Screen, R.string.details)
+
     data object IncomeList : Screen(Income_List_Screen, R.string.income_list)
 
     data object ExpenseList : Screen(Expense_List_Screen, R.string.expense_list)
@@ -42,6 +45,7 @@ sealed class Screen(
                 Income_List_Screen -> IncomeList
                 Expense_List_Screen -> ExpenseList
                 Details_Screen -> Details
+                Subscription_Details_Screen -> SubscriptionDetails
                 else -> Home
             }
     }
