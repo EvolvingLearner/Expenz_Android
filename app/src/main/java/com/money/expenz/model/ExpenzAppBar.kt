@@ -200,7 +200,6 @@ class ExpenzAppBar {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-
             NavigationSetup(viewModel, navController = navController, Screen.Home.route)
         }
     }

@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.money.expenz.BaseActivity
+import com.money.expenz.ExpenzApplication
 import com.money.expenz.data.User
 import com.money.expenz.model.ExpenzAppBar
 import com.money.expenz.utils.ExpenzUtil
@@ -89,6 +90,7 @@ fun RegisterScreen(viewModel: LoginViewModel, onBackToLogin: () -> Unit) {
                                 country = country.value,
                             )
                         viewModel.registerUser(newUser)
+                        ExpenzApplication.amplitudeInstance.track("Sign Up")
                     }
                 },
                 shape = RoundedCornerShape(50.dp),

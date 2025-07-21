@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.money.expenz.BaseActivity
+import com.money.expenz.ExpenzApplication
 import com.money.expenz.model.ExpenzAppBar.ExpenzTheme
 import com.money.expenz.utils.ExpenzUtil
 
@@ -53,6 +54,7 @@ fun LoginScreen(
         ExpenzUtil.UserSession.userId = viewModel.loggedInUserId
         val intent = Intent(context, BaseActivity::class.java)
         context.startActivity(intent)
+        ExpenzApplication.amplitudeInstance.track("Log In")
     }
 
     if (showRegisterScreen) {
