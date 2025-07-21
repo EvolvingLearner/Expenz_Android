@@ -82,4 +82,7 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0"
     implementation "org.jetbrains.kotlin:kotlin-reflect:2.0.20"
+
+    //Amplitude Analytics
+    implementation 'com.amplitude:analytics-android:1.+'
 }

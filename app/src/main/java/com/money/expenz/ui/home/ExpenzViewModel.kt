@@ -48,7 +48,7 @@ class ExpenzViewModel(
         Error
     }
 
-    private val progressBarLoadingState = MutableStateFlow(LoadingState.Loading)
+    val progressBarLoadingState = MutableStateFlow(LoadingState.Loading)
     val loadingState: StateFlow<LoadingState> = progressBarLoadingState
 
     var showDialog by mutableStateOf(false)
@@ -66,6 +66,7 @@ class ExpenzViewModel(
 
     var loggedInUserData = MutableLiveData<User>()
     val loggedInUser: LiveData<User> = loggedInUserData
+    val user = MutableStateFlow<User?>(null)
 
     private var ieDetailsListData: MutableList<IEDetails> = mutableListOf()
 
@@ -127,7 +128,9 @@ class ExpenzViewModel(
     fun getLoggedInUserDetails(loggedInUserId: Int) {
         progressBarLoadingState.value = LoadingState.Loading
         viewModelScope.launch {
-            loggedInUserData.value = repository.getLoggedInUserDetails(loggedInUserId)
+            val currentuser = repository.getLoggedInUserDetails(loggedInUserId)
+            user.value = currentuser
+            loggedInUserData.value = currentuser
         }
         progressBarLoadingState.value = LoadingState.Success
     }
